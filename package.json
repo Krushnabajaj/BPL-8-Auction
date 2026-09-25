@@ -1,0 +1,9 @@
+{
+  "name": "bpl8-auction",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "serve": "node tools/serve.mjs"
+  }
+}

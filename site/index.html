@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BPL 8 Auction 2026 — Login</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="sponsorBar">
+  <div class="sponsorChip"><span class="sponsorLabel">Title Sponsor</span><img src="assets/casorra.jpg" alt="Casorra"></div>
+  <div class="sponsorChip"><span class="sponsorLabel">Co-Title Sponsor</span><img src="assets/chai-katta.png" alt="Chai Katta"></div>
+  <div class="sponsorChip"><span class="sponsorLabel">Community Partner</span><img src="assets/mvpm.jpg" alt="MVPM"></div>
+</div>
+<div class="authWrap">
+  <h1 class="brand">🏏 BPL 8 <span>Auction 2026</span></h1>
+  <div class="card">
+    <h2>Sign in</h2>
+    <p class="muted" id="msg" style="min-height:20px"></p>
+    <form id="loginForm">
+      <label>Email</label>
+      <input id="email" type="email" required autocomplete="username">
+      <label>Password</label>
+      <input id="password" type="password" required autocomplete="current-password">
+      <button class="primary" type="submit" style="width:100%;margin-top:16px">Sign in</button>
+    </form>
+  </div>
+  <p style="text-align:center;margin-top:18px">
+    <a href="display.html">📺 View live projector display (no login needed)</a>
+  </p>
+</div>
+<script type="module">
+  import { onAuth, signIn, resolveRole } from './js/db.js';
+
+  const form = document.getElementById('loginForm');
+  const msg = document.getElementById('msg');
+
+  onAuth(async (user) => {
+    if (!user) return;
+    const { role, teamId } = await resolveRole(user);
+    if (role === 'admin') location.href = 'admin.html';
+    else if (role === 'captain') location.href = `captain.html?team=${teamId}`;
+    else msg.textContent = 'Signed in, but this account is not set up as an admin or captain yet.';
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msg.textContent = 'Signing in…';
+    try {
+      await signIn(document.getElementById('email').value.trim(), document.getElementById('password').value);
+    } catch (err) {
+      msg.textContent = 'Sign-in failed: ' + (err.message || err.code || err);
+    }
+  });
+</script>
+</body>
+</html>

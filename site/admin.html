@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BPL 8 Auction 2026 — Admin</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="sponsorBar compact">
+  <div class="sponsorChip"><span class="sponsorLabel">Title Sponsor</span><img src="assets/casorra.jpg" alt="Casorra"></div>
+  <div class="sponsorChip"><span class="sponsorLabel">Co-Title Sponsor</span><img src="assets/chai-katta.png" alt="Chai Katta"></div>
+  <div class="sponsorChip"><span class="sponsorLabel">Community Partner</span><img src="assets/mvpm.jpg" alt="MVPM"></div>
+</div>
+<header class="topbar">
+  <div class="brand">🏏 BPL 8 <span>Admin</span></div>
+  <div class="row">
+    <a href="display.html" target="_blank"><button type="button">📺 Open Display</button></a>
+    <a href="sponsors.html" target="_blank"><button type="button">🎬 Sponsor Showcase</button></a>
+    <button type="button" id="overlayToggleBtn">📣 Show Sponsor Overlay</button>
+    <button id="signOutBtn" type="button">Sign out</button>
+  </div>
+</header>
+<main class="app">
+  <div class="tabs">
+    <button class="tab active" data-tab="setup">Setup</button>
+    <button class="tab" data-tab="live">Live Auction</button>
+    <button class="tab" data-tab="exports">Exports</button>
+  </div>
+
+  <!-- ===== SETUP ===== -->
+  <section class="tabpane active" id="tab-setup">
+    <div class="grid2">
+      <div class="card">
+        <h3>Auction Settings</h3>
+        <label>Purse per team (₹ Lakh)</label><input id="setPurse" type="number" step="1">
+        <label>Base price (₹ Lakh)</label><input id="setBase" type="number" step="0.5">
+        <label>Squad size incl. captain</label><input id="setSquadSize" type="number" step="1">
+        <label>Increment tiers</label>
+        <div class="row">
+          <div style="flex:1"><small class="muted">Below (₹L)</small><input id="tier1Up" type="number"></div>
+          <div style="flex:1"><small class="muted">Step (₹L)</small><input id="tier1Step" type="number"></div>
+        </div>
+        <div class="row">
+          <div style="flex:1"><small class="muted">Below (₹L)</small><input id="tier2Up" type="number"></div>
+          <div style="flex:1"><small class="muted">Step (₹L)</small><input id="tier2Step" type="number"></div>
+        </div>
+        <div class="row">
+          <div style="flex:1"><small class="muted">Above tier 2 → Step (₹L)</small><input id="tier3Step" type="number"></div>
+        </div>
+        <button class="primary" id="saveSettingsBtn" style="margin-top:12px">Save Settings</button>
+        <p class="muted" id="settingsMsg"></p>
+      </div>
+
+      <div class="card">
+        <h3>Teams</h3>
+        <form id="teamForm">
+          <label>Team Name</label><input id="teamName" required>
+          <label>Captain (must be a player marked "Is Captain")</label>
+          <select id="teamCaptainSelect"><option value="">— Select captain —</option></select>
+          <label>Captain login UID <small class="muted">(from Firebase Console → Authentication, see SETUP.md)</small></label>
+          <input id="teamCaptainUid" placeholder="e.g. 8fJk2...">
+          <button class="primary" type="submit" style="margin-top:10px">＋ Add / Update Team</button>
+        </form>
+        <div class="list" id="teamsList" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3>Players</h3>
+      <p class="muted">48 players go to auction + 8 captains (marked "Is Captain", assigned to a team above, not auctioned).</p>
+      <div class="grid2">
+        <form id="playerForm">
+          <label>Name</label><input id="playerName" required>
+          <label>Role</label>
+          <select id="playerRole">
+            <option value="">Select role</option>
+            <option>Batsman</option><option>Bowler</option><option>All-Rounder</option><option>Wicketkeeper</option>
+          </select>
+          <label><input type="checkbox" id="playerIsCaptain" style="width:auto;display:inline-block;margin-right:6px">This player is a captain</label>
+          <label>Photo</label>
+          <div id="drop" class="drop"><b>📸 Click or drop a photo</b><input id="photoFile" type="file" accept="image/*" style="display:none"><img id="photoPrev" style="display:none"></div>
+          <button class="primary" type="submit" style="margin-top:10px" id="playerSubmitBtn">＋ Add Player</button>
+          <button type="button" id="playerCancelEdit" style="display:none">Cancel edit</button>
+        </form>
+        <div>
+          <label>Bulk add players — one per line: <code>Name | Role</code>. Add <code>*</code> at the end to mark a captain.</label>
+          <textarea id="bulkNames" rows="8" placeholder="Rohit Sharma | Batsman&#10;Virat Kohli | Batsman *&#10;..."></textarea>
+          <button id="bulkAddBtn" style="margin-top:8px">＋ Add All</button>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px"><span class="badge" id="poolCount">0 in pool</span><span class="badge sold" id="soldCount">0 sold</span><span class="badge unsold" id="unsoldCount">0 unsold</span></div>
+      <input id="playerSearch" placeholder="🔎 Search players by name…" style="margin-top:10px">
+      <div class="list" id="playersList" style="margin-top:10px"></div>
+    </div>
+  </section>
+
+  <!-- ===== LIVE ===== -->
+  <section class="tabpane" id="tab-live">
+    <div class="stage">
+      <section class="card playerCard" id="playerCardEl">
+        <div id="photoBox" class="playerPhoto placeholder">🏏</div>
+        <div class="playerName" id="pname">No player drawn yet</div>
+        <div class="playerRole" id="prole" style="display:none"></div>
+        <div class="bidAmount" id="bidAmount"></div>
+        <div class="leadingTeam" id="leadingTeam"></div>
+        <div class="row" style="justify-content:center;margin-top:16px">
+          <button class="primary" id="drawBtn">🎰 Draw Player</button>
+          <button class="danger" id="cancelDrawBtn" style="display:none">↩ Cancel Draw</button>
+        </div>
+        <p class="muted" id="progressLine" style="text-align:center;margin-top:6px"></p>
+        <p class="muted" id="completeBanner" style="text-align:center;font-weight:800;display:none">🏆 Auction Complete — pool is empty</p>
+        <div class="card" id="finalizeBox" style="margin-top:16px;text-align:left;display:none">
+          <label>Winning Team (manual override if needed)</label>
+          <select id="overrideTeam"><option value="">— No team / Unsold —</option></select>
+          <label>Final Price (₹ Lakh)</label>
+          <input id="overridePrice" type="number" step="0.5">
+          <div class="row" style="margin-top:10px">
+            <button class="teal" id="soldBtn">✅ Mark SOLD</button>
+            <button class="danger" id="unsoldBtn">❌ Mark UNSOLD</button>
+          </div>
+        </div>
+        <div class="row" style="justify-content:center;margin-top:10px">
+          <button id="undoBtn">↩ Undo Last</button>
+          <button id="readdUnsoldBtn">↺ Re-add all Unsold to Pool</button>
+        </div>
+      </section>
+      <section class="card">
+        <h3>Live Bids</h3>
+        <div class="bidFeed" id="bidFeed"><p class="muted">No bids yet.</p></div>
+        <h3 style="margin-top:16px">Teams</h3>
+        <div class="teamGrid" id="teamGrid"></div>
+      </section>
+    </div>
+    <section class="card" style="margin-top:16px">
+      <h3>Live Players Board</h3>
+      <div id="livePanelMount"></div>
+    </section>
+  </section>
+
+  <!-- ===== EXPORTS ===== -->
+  <section class="tabpane" id="tab-exports">
+    <div class="card">
+      <h3>Export PDFs</h3>
+      <div class="row">
+        <button id="exportSold">📄 Sold Players PDF</button>
+        <button id="exportUnsold">📄 Unsold Players PDF</button>
+      </div>
+      <h3 style="margin-top:16px">Per-Team Squad PDFs</h3>
+      <div class="row" id="teamExportButtons"></div>
+      <h3 style="margin-top:16px">Full Backup</h3>
+      <p class="muted">A raw data snapshot (settings, teams, players, history — photos excluded) independent of Firebase, as a safety copy.</p>
+      <button id="exportBackup">⬇ Download Backup (JSON)</button>
+    </div>
+  </section>
+</main>
+<div class="connBadge" id="connBadge">🔴 Reconnecting…</div>
+
+<script type="module">
+  import { onAuth, signOutUser, resolveRole, watchSettings, watchTeams, watchPlayers, watchAuctionCurrent, watchHistory, watchConnection, watchBroadcastOverlay, setBroadcastOverlay, getPhoto,
+           saveSettings, saveTeam, deleteTeam, savePlayer, deletePlayer, savePhoto,
+           startDraw, openBidding, cancelDraw, markSold, markUnsold, undoLast, readdUnsoldToPool,
+           editSoldPlayer, revertSoldPlayer } from './js/db.js';
+  import { formatMoney, maxBidForTeam, pickRandomPlayer, isPoolExhausted } from './js/auction-core.js';
+  import { runSpinAnimation } from './js/spinner.js';
+  import { readImageFile } from './js/photo.js';
+  import { exportSoldPDF, exportUnsoldPDF, exportTeamPDF } from './js/pdf.js';
+  import { createPhotoView } from './js/photo-view.js';
+  import { prefetchPhotos } from './js/photo-cache.js';
+  import { pulse, flash, confettiBurst } from './js/fx.js';
+  import { playSoldChime, playUnsoldTone } from './js/sound.js';
+  import { confirmModal, alertModal } from './js/modal.js';
+  import { createLivePlayersPanel } from './js/live-players-panel.js';
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const L = 100000;
+
+  let settings = { purse: 100*L, base: 2*L, squadSize: 7, tiers: [{upTo:10*L,step:1*L},{upTo:30*L,step:2*L},{upTo:null,step:5*L}] };
+  let teams = [], players = [], history = [], auction = { status: 'idle' };
+  let editingPlayerId = null, editingSaleId = null, lastBid = null, playerSearchTerm = '';
+  const livePanel = createLivePlayersPanel($('livePanelMount'));
+  function renderLivePanel() { livePanel.update({ players, teams, history, auction, settings, myTeamId: null }); }
+
+  watchConnection((connected) => $('connBadge').classList.toggle('show', !connected));
+  let overlayActive = false;
+  watchBroadcastOverlay((active) => {
+    overlayActive = active;
+    $('overlayToggleBtn').textContent = active ? '📣 Hide Sponsor Overlay' : '📣 Show Sponsor Overlay';
+    $('overlayToggleBtn').classList.toggle('primary', active);
+  });
+  $('overlayToggleBtn').addEventListener('click', () => setBroadcastOverlay(!overlayActive));
+
+  onAuth(async (user) => {
+    if (!user) { location.href = 'index.html'; return; }
+    const { role } = await resolveRole(user);
+    if (role !== 'admin') { location.href = 'index.html'; return; }
+    startWatching();
+  });
+  $('signOutBtn').addEventListener('click', () => signOutUser());
+
+  document.querySelectorAll('.tab').forEach((btn) => btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach((b) => b.classList.remove('active'));
+    document.querySelectorAll('.tabpane').forEach((p) => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+  }));
+
+  // ---------- Settings ----------
+  function fillSettingsForm() {
+    $('setPurse').value = settings.purse / L;
+    $('setBase').value = settings.base / L;
+    $('setSquadSize').value = settings.squadSize;
+    $('tier1Up').value = settings.tiers[0].upTo / L;
+    $('tier1Step').value = settings.tiers[0].step / L;
+    $('tier2Up').value = settings.tiers[1].upTo / L;
+    $('tier2Step').value = settings.tiers[1].step / L;
+    $('tier3Step').value = settings.tiers[2].step / L;
+  }
+  $('saveSettingsBtn').addEventListener('click', async () => {
+    const newSettings = {
+      purse: Number($('setPurse').value) * L,
+      base: Number($('setBase').value) * L,
+      squadSize: Number($('setSquadSize').value),
+      tiers: [
+        { upTo: Number($('tier1Up').value) * L, step: Number($('tier1Step').value) * L },
+        { upTo: Number($('tier2Up').value) * L, step: Number($('tier2Step').value) * L },
+        { upTo: null, step: Number($('tier3Step').value) * L },
+      ],
+    };
+    await saveSettings(newSettings);
+    $('settingsMsg').textContent = 'Saved ✓';
+    setTimeout(() => ($('settingsMsg').textContent = ''), 2000);
+  });
+
+  // ---------- Teams ----------
+  function renderTeamCaptainOptions() {
+    const captains = players.filter((p) => p.isCaptain);
+    $('teamCaptainSelect').innerHTML = '<option value="">— Select captain —</option>' +
+      captains.map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  }
+  function renderTeamsList() {
+    $('teamsList').innerHTML = teams.map((t) => {
+      const captain = players.find((p) => p.id === t.captainPlayerId);
+      return `<div class="item"><div style="flex:1"><b>${esc(t.name)}</b><br>
+        <span class="muted">Captain: ${esc(captain?.name || '—')} · ${formatMoney(t.purse||0)} left</span></div>
+        <button data-edit-team="${t.id}">Edit</button>
+        <button class="danger" data-del-team="${t.id}">Delete</button></div>`;
+    }).join('') || '<p class="muted">No teams yet.</p>';
+    $('teamsList').querySelectorAll('[data-edit-team]').forEach((b) => b.addEventListener('click', () => {
+      const t = teams.find((x) => x.id === b.dataset.editTeam);
+      $('teamForm').dataset.editId = t.id;
+      $('teamName').value = t.name;
+      $('teamCaptainSelect').value = t.captainPlayerId || '';
+      $('teamCaptainUid').value = t.captainUid || '';
+    }));
+    $('teamsList').querySelectorAll('[data-del-team]').forEach((b) => b.addEventListener('click', async () => {
+      const id = b.dataset.delTeam;
+      const affected = players.filter((p) => p.teamId === id && !p.isCaptain).length;
+      const msg = affected
+        ? `Delete this team? ${affected} sold player${affected === 1 ? '' : 's'} will be returned to the pool.`
+        : 'Delete this team?';
+      if (await confirmModal(msg)) await deleteTeam(id);
+    }));
+  }
+  $('teamForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = $('teamForm').dataset.editId || undefined;
+    const existing = id ? teams.find((t) => t.id === id) : null;
+    const captainPlayerId = $('teamCaptainSelect').value || null;
+    const team = {
+      id, name: $('teamName').value.trim(),
+      captainPlayerId, captainUid: $('teamCaptainUid').value.trim() || null,
+      purse: existing ? existing.purse : settings.purse,
+      boughtCount: existing ? existing.boughtCount : 0,
+    };
+    const newId = await saveTeam(team);
+    if (captainPlayerId) {
+      const cap = players.find((p) => p.id === captainPlayerId);
+      if (cap) await savePlayer({ ...cap, teamId: newId, status: 'captain' });
+    }
+    $('teamForm').reset();
+    delete $('teamForm').dataset.editId;
+  });
+
+  // ---------- Players ----------
+  function renderPlayersList() {
+    const pool = players.filter((p) => p.status === 'pool');
+    const sold = players.filter((p) => p.status === 'sold');
+    const unsold = players.filter((p) => p.status === 'unsold');
+    $('poolCount').textContent = `${pool.length} in pool`;
+    $('soldCount').textContent = `${sold.length} sold`;
+    $('unsoldCount').textContent = `${unsold.length} unsold`;
+    const term = playerSearchTerm.trim().toLowerCase();
+    const visible = term ? players.filter((p) => (p.name || '').toLowerCase().includes(term)) : players;
+    $('playersList').innerHTML = visible.map((p) => {
+      if (p.status === 'sold' && editingSaleId === p.id) {
+        return `<div class="item" style="flex-direction:column;align-items:stretch">
+          <b>${esc(p.name)}</b>
+          <div class="row" style="margin-top:6px">
+            <select data-sale-team style="flex:1">${teams.map((t) => `<option value="${t.id}" ${t.id === p.teamId ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select>
+            <input data-sale-price type="number" step="0.5" style="width:120px" value="${(p.price || 0) / L}" placeholder="₹ Lakh">
+          </div>
+          <div class="row" style="margin-top:6px">
+            <button class="small primary" data-save-sale="${p.id}">Save Correction</button>
+            <button class="small" data-cancel-sale="${p.id}">Cancel</button>
+          </div>
+        </div>`;
+      }
+      const teamName = teams.find((t) => t.id === p.teamId)?.name || '';
+      const statusBadge = p.isCaptain ? `<span class="badge">CAPTAIN — ${esc(teamName)}</span>`
+        : p.status === 'sold' ? `<span class="badge sold">SOLD — ${esc(teamName)} · ${formatMoney(p.price||0)}</span>`
+        : p.status === 'unsold' ? `<span class="badge unsold">UNSOLD</span>`
+        : `<span class="badge">POOL</span>`;
+      const saleActions = p.status === 'sold' && !p.isCaptain
+        ? `<button class="small" data-editsale-player="${p.id}">✏ Edit Sale</button><button class="small danger" data-revert-player="${p.id}">↩ Revert</button>`
+        : '';
+      return `<div class="item"><div style="flex:1"><b>${esc(p.name)}</b> <span class="muted">${esc(p.role||'')}</span><br>${statusBadge}</div>
+        ${saleActions}
+        <button data-edit-player="${p.id}">Edit</button>
+        <button class="danger" data-del-player="${p.id}">Delete</button></div>`;
+    }).join('') || '<p class="muted">No players yet.</p>';
+    $('playersList').querySelectorAll('[data-edit-player]').forEach((b) => b.addEventListener('click', () => startEditPlayer(b.dataset.editPlayer)));
+    $('playersList').querySelectorAll('[data-del-player]').forEach((b) => b.addEventListener('click', async () => {
+      if (await confirmModal('Delete this player?')) await deletePlayer(b.dataset.delPlayer);
+    }));
+    $('playersList').querySelectorAll('[data-editsale-player]').forEach((b) => b.addEventListener('click', () => {
+      editingSaleId = b.dataset.editsalePlayer;
+      renderPlayersList();
+    }));
+    $('playersList').querySelectorAll('[data-cancel-sale]').forEach((b) => b.addEventListener('click', () => {
+      editingSaleId = null;
+      renderPlayersList();
+    }));
+    $('playersList').querySelectorAll('[data-save-sale]').forEach((b) => b.addEventListener('click', async () => {
+      const id = b.dataset.saveSale;
+      const row = b.closest('.item');
+      const teamId = row.querySelector('[data-sale-team]').value;
+      const price = Math.round(Number(row.querySelector('[data-sale-price]').value) * L);
+      if (!teamId || !(price >= 0)) { await alertModal('Pick a team and a valid price.'); return; }
+      editingSaleId = null;
+      await editSoldPlayer(id, teamId, price);
+    }));
+    $('playersList').querySelectorAll('[data-revert-player]').forEach((b) => b.addEventListener('click', async () => {
+      if (await confirmModal('Revert this sale? The player goes back to the draw pool and the team is refunded.')) {
+        await revertSoldPlayer(b.dataset.revertPlayer);
+      }
+    }));
+  }
+  $('playerSearch').addEventListener('input', (e) => { playerSearchTerm = e.target.value; renderPlayersList(); });
+  function startEditPlayer(id) {
+    const p = players.find((x) => x.id === id);
+    if (!p) return;
+    editingPlayerId = id;
+    $('playerName').value = p.name || '';
+    $('playerRole').value = p.role || '';
+    $('playerIsCaptain').checked = !!p.isCaptain;
+    $('playerSubmitBtn').textContent = 'Save Changes';
+    $('playerCancelEdit').style.display = 'inline-block';
+    getPhoto(id).then((src) => { if (src) { $('photoPrev').src = src; $('photoPrev').style.display = 'block'; } });
+  }
+  $('playerCancelEdit').addEventListener('click', () => {
+    editingPlayerId = null;
+    $('playerForm').reset();
+    $('photoPrev').style.display = 'none';
+    $('playerSubmitBtn').textContent = '＋ Add Player';
+    $('playerCancelEdit').style.display = 'none';
+  });
+
+  const drop = $('drop'), photoFile = $('photoFile'), photoPrev = $('photoPrev');
+  drop.addEventListener('click', () => photoFile.click());
+  photoFile.addEventListener('change', async () => {
+    if (!photoFile.files[0]) return;
+    try {
+      const compressed = await readImageFile(photoFile.files[0]);
+      photoPrev.src = compressed; photoPrev.style.display = 'block';
+      photoFile.dataset.compressed = compressed;
+    } catch (err) { await alertModal(err.message); }
+  });
+  ['dragenter','dragover'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('drag'); }));
+  ['dragleave','drop'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('drag'); }));
+  drop.addEventListener('drop', async (e) => {
+    const f = e.dataTransfer.files[0];
+    if (f) { try { const c = await readImageFile(f); photoPrev.src = c; photoPrev.style.display = 'block'; photoFile.dataset.compressed = c; } catch (err) { await alertModal(err.message); } }
+  });
+
+  $('playerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const isCaptain = $('playerIsCaptain').checked;
+    const existing = editingPlayerId ? players.find((p) => p.id === editingPlayerId) : null;
+    const player = {
+      id: editingPlayerId || undefined,
+      name: $('playerName').value.trim(),
+      role: $('playerRole').value,
+      isCaptain,
+      status: existing ? existing.status : (isCaptain ? 'captain' : 'pool'),
+      teamId: existing?.teamId || null,
+      price: existing?.price || null,
+    };
+    const id = await savePlayer(player);
+    if (photoFile.dataset.compressed) { await savePhoto(id, photoFile.dataset.compressed); delete photoFile.dataset.compressed; }
+    $('playerCancelEdit').click();
+  });
+
+  const ROLE_ALIASES = {
+    batsman: 'Batsman', bat: 'Batsman',
+    bowler: 'Bowler', bowl: 'Bowler',
+    'all-rounder': 'All-Rounder', allrounder: 'All-Rounder', 'all rounder': 'All-Rounder', 'all-round': 'All-Rounder',
+    wicketkeeper: 'Wicketkeeper', 'wicket keeper': 'Wicketkeeper', wk: 'Wicketkeeper',
+  };
+  function normalizeRole(raw) {
+    const key = raw.trim().toLowerCase();
+    return ROLE_ALIASES[key] || raw.trim();
+  }
+  function parseBulkLine(line) {
+    const [namePart, ...rest] = line.split('|');
+    let rolePart = rest.join('|').trim();
+    const isCaptain = rolePart.endsWith('*');
+    if (isCaptain) rolePart = rolePart.slice(0, -1).trim();
+    return { name: namePart.trim(), role: rolePart ? normalizeRole(rolePart) : '', isCaptain };
+  }
+  $('bulkAddBtn').addEventListener('click', async () => {
+    const lines = $('bulkNames').value.split('\n').map((s) => s.trim()).filter(Boolean);
+    for (const line of lines) {
+      const { name, role, isCaptain } = parseBulkLine(line);
+      if (!name) continue;
+      await savePlayer({ name, role, isCaptain, status: isCaptain ? 'captain' : 'pool', teamId: null, price: null });
+    }
+    $('bulkNames').value = '';
+  });
+
+  // ---------- Live auction ----------
+  let lastAnimatedKey = null;
+  function renderTeamGrid() {
+    $('teamGrid').innerHTML = teams.map((t) => {
+      const full = (t.boughtCount||0) >= settings.squadSize - 1;
+      const leading = auction.leadingTeamId === t.id;
+      return `<div class="teamTile${leading?' leading':''}"><b>${esc(t.name)}</b>
+        <div>${formatMoney(t.purse||0)} left</div><div class="muted">${t.boughtCount||0}/${settings.squadSize-1} bought</div>
+        ${full?'<div class="full">FULL</div>':`<div class="muted">Max: ${formatMoney(maxBidForTeam(t,settings))}</div>`}</div>`;
+    }).join('');
+    $('overrideTeam').innerHTML = '<option value="">— No team / Unsold —</option>' + teams.map((t) => `<option value="${t.id}">${esc(t.name)}</option>`).join('');
+  }
+  function renderBidFeed() {
+    const log = Object.values(auction.bidLog || {}).sort((a,b) => b.at - a.at);
+    $('bidFeed').innerHTML = log.length ? log.map((b) => {
+      const t = teams.find((x) => x.id === b.teamId);
+      return `<div class="item">${esc(t?.name||'?')} → ${formatMoney(b.amount)}</div>`;
+    }).join('') : '<p class="muted">No bids yet.</p>';
+  }
+  const showLivePhoto = createPhotoView($('photoBox'));
+  function showPlayer(p) {
+    $('pname').textContent = p ? (p.name || 'Unnamed Player') : 'No player drawn yet';
+    if (p && p.role) { $('prole').style.display='inline-block'; $('prole').textContent = p.role; } else $('prole').style.display='none';
+    showLivePhoto(p);
+  }
+  function renderLive() {
+    renderTeamGrid();
+    renderBidFeed();
+    const p = players.find((x) => x.id === auction.playerId);
+    const poolExhausted = isPoolExhausted(players) && players.length > 0;
+    $('drawBtn').disabled = auction.status !== 'idle' || poolExhausted;
+    $('cancelDrawBtn').style.display = auction.status !== 'idle' ? 'inline-block' : 'none';
+    $('completeBanner').style.display = poolExhausted && auction.status === 'idle' ? 'block' : 'none';
+    const auctionable = players.filter((x) => !x.isCaptain);
+    const soldCount = auctionable.filter((x) => x.status === 'sold').length;
+    $('progressLine').textContent = auctionable.length ? `${soldCount} of ${auctionable.length} sold` : '';
+    $('finalizeBox').style.display = (auction.status === 'bidding') ? 'block' : 'none';
+    if (auction.status === 'bidding' && p) {
+      $('overrideTeam').value = auction.leadingTeamId || '';
+      $('overridePrice').value = (auction.bid || settings.base) / L;
+    }
+    if (auction.status === 'idle' || !p) { showPlayer(auction.status==='idle'?null:p); $('bidAmount').textContent=''; $('leadingTeam').textContent=''; return; }
+    if (auction.status === 'spinning') {
+      const key = `${auction.playerId}-${auction.spinStartedAt}`;
+      if (key !== lastAnimatedKey) {
+        lastAnimatedKey = key;
+        const pool = players.filter((x) => x.status === 'pool');
+        runSpinAnimation(pool.length?pool:[p], p, auction.spinStartedAt, {
+          onTick: (tp) => { $('pname').textContent = tp.name || 'Unnamed Player'; },
+          onDone: () => { showPlayer(p); openBidding(); },
+        });
+      }
+      $('bidAmount').textContent=''; $('leadingTeam').textContent='';
+      return;
+    }
+    showPlayer(p);
+    const bidNow = auction.bid || settings.base || 0;
+    $('bidAmount').textContent = formatMoney(bidNow);
+    if (lastBid !== null && bidNow !== lastBid) pulse($('bidAmount'));
+    lastBid = bidNow;
+    const leader = teams.find((t) => t.id === auction.leadingTeamId);
+    $('leadingTeam').textContent = leader ? `Leading: ${leader.name}` : 'No bids yet — base price';
+  }
+
+  $('drawBtn').addEventListener('click', async () => {
+    const pool = players.filter((p) => p.status === 'pool');
+    const picked = pickRandomPlayer(pool);
+    if (!picked) { await alertModal('No players left in the pool.'); return; }
+    await startDraw(picked.id);
+  });
+  $('cancelDrawBtn').addEventListener('click', async () => {
+    if (await confirmModal('Cancel this draw? Nothing will be recorded — the player stays in the pool.')) await cancelDraw();
+  });
+  $('soldBtn').addEventListener('click', async () => {
+    const p = players.find((x) => x.id === auction.playerId);
+    if (!p) return;
+    const teamId = $('overrideTeam').value;
+    const price = Math.round(Number($('overridePrice').value) * L);
+    if (!teamId) { await alertModal('Select a winning team, or use Mark UNSOLD.'); return; }
+    await markSold(p.id, teamId, price);
+    flash($('playerCardEl'), 'rgba(45,212,191,.5)');
+    confettiBurst($('playerCardEl'));
+    playSoldChime();
+  });
+  $('unsoldBtn').addEventListener('click', async () => {
+    const p = players.find((x) => x.id === auction.playerId);
+    if (!p) return;
+    await markUnsold(p.id);
+    flash($('playerCardEl'), 'rgba(230,57,70,.5)');
+    playUnsoldTone();
+  });
+  $('undoBtn').addEventListener('click', async () => {
+    if (await confirmModal('Undo the last sold/unsold result?')) await undoLast();
+  });
+  $('readdUnsoldBtn').addEventListener('click', async () => {
+    if (await confirmModal('Move all unsold players back into the pool?')) await readdUnsoldToPool();
+  });
+
+  // ---------- Exports ----------
+  $('exportSold').addEventListener('click', () => exportSoldPDF(players, teams));
+  $('exportUnsold').addEventListener('click', () => exportUnsoldPDF(players));
+  $('exportBackup').addEventListener('click', () => {
+    const backup = { exportedAt: new Date().toISOString(), settings, teams, players, history };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `BPL8_Auction_2026_Backup_${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 5000);
+  });
+  function renderTeamExportButtons() {
+    $('teamExportButtons').innerHTML = teams.map((t) => `<button data-export-team="${t.id}">📄 ${esc(t.name)}</button>`).join('');
+    $('teamExportButtons').querySelectorAll('[data-export-team]').forEach((b) => b.addEventListener('click', () => {
+      exportTeamPDF(teams.find((t) => t.id === b.dataset.exportTeam), players);
+    }));
+  }
+
+  function startWatching() {
+    watchSettings((s) => { if (s && s.tiers) settings = s; fillSettingsForm(); renderLive(); renderLivePanel(); });
+    watchTeams((t) => { teams = t; renderTeamCaptainOptions(); renderTeamsList(); renderPlayersList(); renderLive(); renderTeamExportButtons(); renderLivePanel(); });
+    watchPlayers((p) => { players = p; renderTeamCaptainOptions(); renderPlayersList(); renderLive(); prefetchPhotos(p); renderLivePanel(); });
+    watchAuctionCurrent((a) => { auction = a; renderLive(); renderLivePanel(); });
+    watchHistory((h) => { history = h; renderLivePanel(); });
+    fillSettingsForm();
+  }
+</script>
+</body>
+</html>

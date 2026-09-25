@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BPL 8 Auction 2026 — Sponsor Showcase</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="sponsorShowcaseStart" id="startScreen">
+  <div class="sponsorReelTitle">🏏 BPL 8<span>Auction 2026</span></div>
+  <p class="muted">Sponsor Showcase — banners, flyers &amp; sponsor videos</p>
+  <button class="primary bigBidBtn" id="startBtn" style="max-width:320px">▶ Start Showcase</button>
+  <p class="muted" style="margin-top:18px;font-size:12px">← → change slide · Space pause · F fullscreen</p>
+</div>
+<div class="sponsorReelHost" id="reelHost" style="display:none"></div>
+
+<script type="module">
+  import { createSponsorReel } from './js/sponsor-reel.js';
+  import { SPONSOR_SLIDES } from './js/sponsor-media.js';
+
+  const startScreen = document.getElementById('startScreen');
+  const reelHost = document.getElementById('reelHost');
+  const reel = createSponsorReel(reelHost, SPONSOR_SLIDES, { includeVideo: true });
+
+  document.getElementById('startBtn').addEventListener('click', () => {
+    startScreen.style.display = 'none';
+    reelHost.style.display = 'block';
+    if (reelHost.requestFullscreen) reelHost.requestFullscreen().catch(() => {});
+    reel.start();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (reelHost.style.display === 'none') return;
+    if (e.key === 'ArrowRight') reel.next();
+    else if (e.key === 'ArrowLeft') reel.prev();
+    else if (e.key === ' ') { e.preventDefault(); reel.togglePause(); }
+    else if (e.key === 'f' || e.key === 'F') {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else reelHost.requestFullscreen?.().catch(() => {});
+    }
+  });
+</script>
+</body>
+</html>

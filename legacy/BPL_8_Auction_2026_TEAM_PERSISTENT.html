@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>BPL 8 Auction 2026 Projector</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#050a07;color:#fff;min-height:100vh}
+header{height:70px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;background:#08150e;border-bottom:1px solid #ffffff18}
+.brand{font-size:24px;font-weight:900}.brand span{color:#f5c542}.top{display:flex;gap:8px}
+button{border:0;border-radius:10px;padding:12px 18px;font-weight:900;cursor:pointer;background:#f5c542;color:#07110c;font-size:15px}button.alt{background:#ffffff12;color:#fff;border:1px solid #ffffff1e}button.red{background:#d94752;color:#fff}
+.app{padding:18px;max-width:1700px;margin:auto}.screen{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;min-height:calc(100vh - 110px)}
+.card{background:#ffffff08;border:1px solid #ffffff18;border-radius:20px;padding:18px;box-shadow:0 18px 55px #0008}.left{display:flex;flex-direction:column;justify-content:center}.wheelbox{position:relative;display:flex;justify-content:center;align-items:center;flex:1}.pointer{position:absolute;top:3px;left:50%;transform:translateX(-50%);z-index:3;border-left:17px solid transparent;border-right:17px solid transparent;border-top:34px solid #fff;filter:drop-shadow(0 3px 5px #000)}
+#wheel{
+  width:min(680px,78vw);height:min(500px,62vh);
+  border-radius:28px;border:2px solid #f5c542;
+  position:relative;overflow:hidden;
+  background:linear-gradient(180deg,#101b16,#050a07 45%,#101b16);
+  box-shadow:0 0 0 7px #0b1710,0 22px 70px #000b,inset 0 0 45px #000;
+}
+#labels{
+  position:absolute;left:0;right:0;top:50%;
+  display:flex;flex-direction:column;align-items:center;
+  transform:translateY(-50%);
+  will-change:transform;
+}
+.label{
+  position:relative!important;left:auto!important;top:auto!important;
+  transform:none!important;
+  width:92%;height:64px;flex:0 0 64px;min-height:64px;box-sizing:border-box;
+  margin:0;display:flex;align-items:center;justify-content:center;
+  font-size:clamp(22px,2.3vw,34px);font-weight:900;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  color:#aeb9b2;text-shadow:0 2px 5px #000;
+  padding:0 25px;
+}
+.label:nth-child(3n+1){color:#d8dfdb}
+.slotmachine{width:100%;display:flex;flex-direction:column;align-items:center;gap:12px}
+.slotHeader,.slotFooter{
+  font-weight:1000;letter-spacing:4px;text-align:center;
+  color:#f5c542;font-size:14px;
+}
+.slotFooter{color:#8f9d96;font-size:11px;letter-spacing:3px}
+.slotWindow{position:relative}
+.slotCenter{
+  position:absolute;left:3%;right:3%;top:50%;height:68px;
+  transform:translateY(-50%);border-top:2px solid #f5c542;border-bottom:2px solid #f5c542;
+  background:linear-gradient(90deg,#f5c54208,#f5c54218,#f5c54208);
+  box-shadow:0 0 30px #f5c54220,inset 0 0 20px #f5c5420d;
+  pointer-events:none;border-radius:12px;
+}
+.slotGlow{
+  position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:linear-gradient(180deg,#050a07 0%,transparent 25%,transparent 75%,#050a07 100%);
+}
+.controls{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:12px}.controls button{min-width:130px}
+.right{display:flex;flex-direction:column;min-width:0}.status{text-align:center;font-size:19px;font-weight:900;color:#f5c542;margin-bottom:8px}.playerphoto{width:min(480px,45vh);height:min(480px,45vh);object-fit:cover;border-radius:22px;border:7px solid #f5c542;background:#173523;display:block;margin:0 auto;box-shadow:0 15px 55px #0008}
+.placeholder{width:min(480px,45vh);height:min(480px,45vh);border-radius:22px;border:3px dashed #ffffff28;margin:0 auto;display:grid;place-items:center;font-size:100px;background:#ffffff05}
+.playername{text-align:center;font-size:clamp(30px,4vw,62px);font-weight:1000;margin:12px 0 2px;line-height:1}.role{text-align:center;color:#cbd7d0;font-size:22px;font-weight:800}.bid{font-size:clamp(38px,5vw,76px);text-align:center;color:#f5c542;font-weight:1000;margin:8px}.team{text-align:center;font-size:20px}.auction{margin-top:12px;background:#ffffff07;border-radius:15px;padding:12px}.bidrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.big{font-size:18px;padding:16px}.teamcards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.teamcard{background:#ffffff08;border:1px solid #ffffff12;border-radius:12px;padding:10px}.teamcard b{color:#f5c542;display:block;font-size:18px}.teamcard small{color:#aab8b1}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}.stat{background:#ffffff08;border-radius:10px;padding:10px}.stat b{display:block;color:#f5c542;font-size:20px}
+.modal{display:none;position:fixed;inset:0;background:#000c;z-index:20;align-items:center;justify-content:center;padding:18px}.modal.on{display:flex}.modalbox{background:#0b1b13;border:1px solid #ffffff20;border-radius:18px;padding:20px;width:min(720px,100%);max-height:90vh;overflow:auto}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}label{display:block;color:#b8c6bf;font-size:13px;margin:8px 0 5px}input,select,textarea{width:100%;padding:11px;border-radius:9px;border:1px solid #ffffff20;background:#06100b;color:#fff}.drop{border:2px dashed #ffffff2c;padding:18px;text-align:center;border-radius:12px;cursor:pointer}.drop.drag{border-color:#f5c542;background:#f5c54212}
+.manager{display:none;padding:18px}.manager.on{display:block}.managergrid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.list{max-height:420px;overflow:auto}.item{display:flex;gap:10px;align-items:center;padding:10px;border-bottom:1px solid #ffffff12}.thumb{width:50px;height:50px;object-fit:cover;border-radius:8px;background:#173523}.muted{color:#9eaea6}.resultOnly .bidrow,.resultOnly .teamcards{display:none}.resultOnly .auction{background:transparent;padding:0}.resultOnly .controls{margin-top:18px}.resultOnly .big{font-size:22px;min-width:170px}.history{max-height:250px;overflow:auto}
+@media(max-width:1050px){.screen{grid-template-columns:1fr}.right{order:-1}.playerphoto,.placeholder{width:min(420px,70vw);height:min(420px,70vw)}}@media(max-width:600px){.formgrid,.bidrow,.managergrid{grid-template-columns:1fr}.teamcards,.stats{grid-template-columns:1fr 1fr}.playername{font-size:35px}}
+
+/* PREMIUM IPL-STYLE SPINNER REDESIGN */
+#wheel{
+  border-radius:50%;
+  box-shadow:0 0 0 10px rgba(255,255,255,.04),0 0 45px rgba(220,30,45,.30),inset 0 0 35px rgba(0,0,0,.65);
+}
+.wheelWrap{filter:drop-shadow(0 18px 30px rgba(0,0,0,.45));}
+.pointer{
+  filter:drop-shadow(0 3px 6px rgba(0,0,0,.65));
+}
+.playerLabel{
+  font-weight:900!important;
+  letter-spacing:.2px;
+  text-shadow:0 2px 5px rgba(0,0,0,.9);
+}
+</style>
+<style id="projector-cleanup">
+  .teamcards, .stats, .summary, .dashboardStats, .playerCount, .budgetCards { display:none !important; }
+  .projector-only { display:block !important; }
+</style>
+<style id="winner-display-fix">
+#drawWinner{
+  margin-top:14px;
+  min-height:88px;
+  padding:14px 28px;
+  border:1px solid rgba(245,197,66,.55);
+  border-radius:18px;
+  background:linear-gradient(180deg,rgba(245,197,66,.10),rgba(255,255,255,.025));
+  box-shadow:0 0 28px rgba(245,197,66,.12), inset 0 0 18px rgba(0,0,0,.25);
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+#drawWinner .winnerKicker{
+  color:#f5c542;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:3px;
+  margin-bottom:5px;
+}
+#drawWinnerName{
+  color:#fff;
+  font-size:clamp(28px,3vw,46px);
+  line-height:1.05;
+  font-weight:1000;
+  text-shadow:0 3px 10px #000;
+}
+</style>
+<style id="slot-selected-fix">
+#slotSelectedName{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 55px;
+  color:#fff;
+  font-size:clamp(25px,3vw,44px);
+  line-height:1;
+  font-weight:1000;
+  text-align:center;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  text-shadow:0 3px 12px #000,0 0 18px rgba(245,197,66,.35);
+  z-index:5;
+}
+</style>
+<style id="photo-upload-enhancement">
+.photo-drop-zone{
+  margin:12px 0;
+  min-height:130px;
+  border:2px dashed rgba(245,197,66,.65);
+  border-radius:18px;
+  background:linear-gradient(180deg,rgba(245,197,66,.08),rgba(255,255,255,.025));
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;cursor:pointer;transition:.2s ease;
+  padding:18px;box-sizing:border-box;
+}
+.photo-drop-zone:hover,.photo-drop-zone.dragover{
+  border-color:#f5c542;
+  background:rgba(245,197,66,.14);
+  transform:translateY(-1px);
+}
+.photo-drop-icon{font-size:30px;margin-bottom:5px}
+.photo-drop-title{font-size:18px;font-weight:900;color:#fff}
+.photo-drop-help{font-size:12px;color:#aeb9b2;margin-top:5px}
+.photo-drop-preview{
+  display:none;margin-top:10px;width:72px;height:72px;border-radius:12px;
+  overflow:hidden;border:2px solid #f5c542;background:#111;
+}
+.photo-drop-preview img{width:100%;height:100%;object-fit:cover}
+#playerPhotoFile{display:block;margin-top:8px;max-width:100%}
+</style>
+<style id="premium-modern-theme">
+:root{
+  --bg:#07090d;--panel:#0d1118;--panel2:#111722;--line:rgba(255,255,255,.09);
+  --gold:#f6c453;--gold2:#ffdf7d;--red:#ff3d54;--text:#f7f8fa;--muted:#8993a2;
+}
+html,body{
+  background:
+    radial-gradient(circle at 12% 8%,rgba(246,196,83,.10),transparent 27%),
+    radial-gradient(circle at 88% 15%,rgba(255,61,84,.09),transparent 25%),
+    linear-gradient(135deg,#05070a,#090d13 48%,#06080c)!important;
+  color:var(--text)!important;
+}
+body:before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
+  background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);
+  background-size:42px 42px;
+}
+header,.topbar,.navbar{
+  background:rgba(7,9,13,.72)!important;
+  border-bottom:1px solid var(--line)!important;
+  backdrop-filter:blur(22px)!important;
+  box-shadow:0 12px 35px rgba(0,0,0,.25)!important;
+}
+.card,.panel,.modal,.management,.auctionPanel,.wheelbox{
+  background:linear-gradient(145deg,rgba(18,24,34,.92),rgba(9,13,19,.94))!important;
+  border:1px solid var(--line)!important;
+  box-shadow:0 24px 70px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.035)!important;
+  border-radius:24px!important;
+  backdrop-filter:blur(18px)!important;
+}
+button,.btn{
+  border-radius:13px!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  background:linear-gradient(135deg,#171e29,#0f141c)!important;
+  color:#fff!important;
+  box-shadow:0 8px 22px rgba(0,0,0,.25)!important;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease!important;
+}
+button:hover,.btn:hover{
+  transform:translateY(-2px)!important;
+  border-color:rgba(246,196,83,.55)!important;
+  box-shadow:0 12px 28px rgba(0,0,0,.38),0 0 22px rgba(246,196,83,.08)!important;
+}
+input,select,textarea{
+  background:#080c12!important;color:#fff!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  border-radius:12px!important;
+  box-shadow:inset 0 1px 8px rgba(0,0,0,.25)!important;
+}
+input:focus,select:focus,textarea:focus{
+  outline:none!important;border-color:rgba(246,196,83,.65)!important;
+  box-shadow:0 0 0 3px rgba(246,196,83,.10)!important;
+}
+.slotmachine{
+  padding:10px!important;
+}
+.slotHeader{
+  font-size:12px!important;letter-spacing:5px!important;
+  color:var(--gold2)!important;
+  text-shadow:0 0 18px rgba(246,196,83,.25);
+}
+#wheel{
+  border-color:rgba(246,196,83,.72)!important;
+  background:
+    radial-gradient(circle at 50% 48%,rgba(246,196,83,.055),transparent 30%),
+    linear-gradient(180deg,#111925,#070a0f 50%,#101722)!important;
+  box-shadow:0 0 0 7px #080c11,0 30px 80px rgba(0,0,0,.6),
+             0 0 45px rgba(246,196,83,.10),inset 0 0 50px #000!important;
+}
+.slotCenter{
+  border-color:rgba(246,196,83,.85)!important;
+  background:linear-gradient(90deg,rgba(246,196,83,.03),rgba(246,196,83,.13),rgba(246,196,83,.03))!important;
+  box-shadow:0 0 35px rgba(246,196,83,.13),inset 0 0 25px rgba(246,196,83,.04)!important;
+}
+#slotSelectedName,#drawWinnerName{
+  color:#fff!important;
+  text-shadow:0 0 18px rgba(246,196,83,.25),0 3px 12px #000!important;
+}
+.label{color:#b8c0ca!important}
+.label:nth-child(3n+1){color:#eef1f4!important}
+#drawWinner{
+  border-color:rgba(246,196,83,.35)!important;
+  background:linear-gradient(145deg,rgba(246,196,83,.08),rgba(255,255,255,.02))!important;
+}
+#drawWinner .winnerKicker{color:var(--gold2)!important}
+.status,.badge,.tag{
+  border-radius:999px!important;
+}
+.photo-drop-zone,.drop{
+  border-color:rgba(246,196,83,.42)!important;
+  background:linear-gradient(145deg,rgba(246,196,83,.055),rgba(255,255,255,.015))!important;
+}
+.photo-drop-zone:hover,.drop:hover,.drop.drag{
+  border-color:var(--gold)!important;
+  background:rgba(246,196,83,.09)!important;
+}
+</style>
+<style id="single-name-reel">
+#labels{
+  display:none!important;
+}
+#wheel{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+.slotCenter{
+  position:absolute!important;
+  top:50%!important;
+  left:5%!important;
+  right:5%!important;
+  transform:translateY(-50%)!important;
+  z-index:10!important;
+}
+#slotSelectedName{
+  position:absolute!important;
+  inset:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  font-size:clamp(30px,3.2vw,48px)!important;
+  font-weight:1000!important;
+}
+</style>
+<style id="premium-draw-stage-final">
+/* Clean premium projector draw stage */
+.wheelbox{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  padding:8px 0!important;
+}
+.slotmachine{
+  gap:18px!important;
+}
+.slotHeader{
+  font-family:Inter,system-ui,sans-serif!important;
+  font-size:12px!important;
+  letter-spacing:5px!important;
+  color:#d8b45a!important;
+  font-weight:800!important;
+  opacity:.95!important;
+}
+.slotWindow{
+  width:min(860px,86vw)!important;
+  height:330px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  position:relative!important;
+  overflow:hidden!important;
+  border-radius:28px!important;
+  background:
+    radial-gradient(circle at 50% 50%,rgba(215,178,83,.075),transparent 38%),
+    linear-gradient(180deg,#10151a 0%,#090d11 100%)!important;
+  border:1px solid rgba(255,255,255,.075)!important;
+  box-shadow:
+    0 25px 70px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.045)!important;
+}
+#wheel{
+  width:100%!important;
+  height:100%!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  position:relative!important;
+}
+.slotGlow{
+  background:
+    radial-gradient(ellipse at center,rgba(215,178,83,.075) 0%,transparent 48%),
+    linear-gradient(180deg,rgba(0,0,0,.45),transparent 28%,transparent 72%,rgba(0,0,0,.55))!important;
+  z-index:2!important;
+}
+.slotCenter{
+  left:8%!important;
+  right:8%!important;
+  top:50%!important;
+  height:94px!important;
+  transform:translateY(-50%)!important;
+  border:1px solid rgba(220,186,97,.62)!important;
+  border-radius:18px!important;
+  background:rgba(255,255,255,.025)!important;
+  box-shadow:
+    0 0 0 1px rgba(220,186,97,.06),
+    0 12px 35px rgba(0,0,0,.35),
+    inset 0 0 28px rgba(220,186,97,.045)!important;
+  z-index:4!important;
+}
+.slotCenter:before,
+.slotCenter:after{
+  content:""!important;
+  position:absolute!important;
+  top:50%!important;
+  width:7px!important;
+  height:7px!important;
+  transform:translateY(-50%) rotate(45deg)!important;
+  background:#e0bd66!important;
+  box-shadow:0 0 12px rgba(224,189,102,.55)!important;
+}
+.slotCenter:before{left:-4px!important}
+.slotCenter:after{right:-4px!important}
+#slotSelectedName{
+  font-size:clamp(30px,3.3vw,52px)!important;
+  font-weight:850!important;
+  letter-spacing:-.02em!important;
+  color:#f5f5f2!important;
+  text-shadow:0 2px 18px rgba(0,0,0,.75)!important;
+}
+.slotFooter{
+  display:none!important;
+}
+#drawWinner{
+  margin-top:2px!important;
+  min-height:64px!important;
+  padding:8px 22px!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+#drawWinner .winnerKicker{
+  font-size:9px!important;
+  letter-spacing:3.5px!important;
+  color:#8e969e!important;
+  margin-bottom:6px!important;
+}
+#drawWinnerName{
+  font-size:clamp(20px,2.2vw,30px)!important;
+  font-weight:750!important;
+  color:#e3c875!important;
+  text-shadow:none!important;
+}
+.controls{
+  margin-top:4px!important;
+}
+.controls button:first-child{
+  min-width:190px!important;
+  height:48px!important;
+  padding:0 24px!important;
+  background:linear-gradient(180deg,#e1bf69,#c59e4b)!important;
+  color:#111!important;
+  border:0!important;
+  font-weight:900!important;
+  box-shadow:0 10px 25px rgba(197,158,75,.18)!important;
+}
+.controls button:first-child:hover{
+  transform:translateY(-2px)!important;
+  box-shadow:0 13px 30px rgba(197,158,75,.25)!important;
+}
+.controls button.alt{
+  height:48px!important;
+  background:#151a20!important;
+  color:#c8cdd2!important;
+}
+@media(max-width:800px){
+  .slotWindow{height:270px!important}
+  .slotCenter{left:5%!important;right:5%!important;height:82px!important}
+}
+</style>
+<style id="final-no-oval-broadcast">
+/* FINAL BROADCAST-STYLE PLAYER DRAW — no wheel, no oval, no ring */
+.wheelWrap,
+.wheelWrap:before,
+.wheelWrap:after{
+  border-radius:0!important;
+}
+.wheelWrap:before,
+.wheelWrap:after{
+  display:none!important;
+}
+.pointer{display:none!important}
+
+.wheelbox{
+  padding:18px 0 10px!important;
+}
+.slotmachine{
+  gap:16px!important;
+}
+.slotHeader{
+  width:min(920px,90vw)!important;
+  text-align:left!important;
+  padding:0 4px!important;
+  font-size:12px!important;
+  letter-spacing:4px!important;
+  color:#d7dbe0!important;
+  position:relative!important;
+}
+.slotHeader:after{
+  content:"LIVE AUCTION"!important;
+  float:right!important;
+  color:#caa95a!important;
+  font-size:10px!important;
+  letter-spacing:2.5px!important;
+  padding-top:1px!important;
+}
+
+.slotWindow{
+  width:min(920px,90vw)!important;
+  height:300px!important;
+  border-radius:6px!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  background:#0b0f14!important;
+  box-shadow:0 24px 60px rgba(0,0,0,.48)!important;
+  overflow:hidden!important;
+  position:relative!important;
+}
+.slotWindow:before{
+  content:""!important;
+  position:absolute!important;
+  left:0!important;right:0!important;top:0!important;
+  height:3px!important;
+  background:linear-gradient(90deg,#8f1d2c,#d4b05d,#8f1d2c)!important;
+  z-index:8!important;
+}
+.slotWindow:after{
+  content:""!important;
+  position:absolute!important;
+  left:0!important;right:0!important;bottom:0!important;
+  height:1px!important;
+  background:rgba(255,255,255,.08)!important;
+  z-index:8!important;
+}
+#wheel{
+  width:100%!important;
+  height:100%!important;
+  border:0!important;
+  border-radius:0!important;
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.025),transparent 18%,transparent 82%,rgba(255,255,255,.025)),
+    #0b0f14!important;
+  box-shadow:none!important;
+}
+.slotGlow{
+  background:linear-gradient(180deg,rgba(0,0,0,.58),transparent 28%,transparent 72%,rgba(0,0,0,.62))!important;
+}
+.slotCenter{
+  left:0!important;right:0!important;
+  top:50%!important;
+  height:92px!important;
+  transform:translateY(-50%)!important;
+  border-radius:0!important;
+  border-top:1px solid rgba(205,173,91,.72)!important;
+  border-bottom:1px solid rgba(205,173,91,.72)!important;
+  border-left:0!important;border-right:0!important;
+  background:linear-gradient(90deg,transparent,rgba(205,173,91,.055) 50%,transparent)!important;
+  box-shadow:inset 0 0 35px rgba(205,173,91,.025)!important;
+}
+.slotCenter:before,.slotCenter:after{display:none!important}
+#slotSelectedName{
+  font-size:clamp(32px,4vw,58px)!important;
+  font-weight:850!important;
+  letter-spacing:-.025em!important;
+  color:#f2f3f4!important;
+  text-shadow:none!important;
+}
+#drawWinner{
+  margin-top:8px!important;
+  padding:0!important;
+  min-height:52px!important;
+}
+#drawWinner .winnerKicker{
+  color:#8e969f!important;
+  letter-spacing:3px!important;
+  font-size:8px!important;
+}
+#drawWinnerName{
+  color:#d7b967!important;
+  font-size:clamp(19px,2vw,28px)!important;
+  font-weight:800!important;
+}
+.controls{margin-top:10px!important}
+.controls button:first-child{
+  min-width:210px!important;
+  height:50px!important;
+  border-radius:5px!important;
+  background:#c9a552!important;
+  color:#101214!important;
+  box-shadow:none!important;
+  text-transform:uppercase!important;
+  letter-spacing:1.2px!important;
+}
+.controls button.alt{
+  height:50px!important;
+  border-radius:5px!important;
+  background:#151a20!important;
+}
+@media(max-width:800px){
+  .slotWindow{height:250px!important}
+}
+</style>
+<style id="premium-distinct-stage">
+/* DISTINCT PREMIUM BROADCAST STAGE — intentionally NOT a wheel, oval, card, or glassmorphism look */
+html,body{background:#070909!important;color:#f4f1e8!important}
+body{font-family:Inter,Segoe UI,Arial,sans-serif!important;overflow-x:hidden}
+header{height:76px!important;background:#070909!important;border-bottom:1px solid rgba(255,255,255,.08)!important;padding:0 34px!important}
+.brand{font-size:20px!important;letter-spacing:1px!important;color:#f5f2e9!important}
+.brand span{color:#d7ad55!important}
+.app{max-width:1900px!important;padding:22px 34px 30px!important}
+.screen{display:block!important;min-height:calc(100vh - 120px)!important}
+.left.card{min-height:calc(100vh - 150px)!important;padding:0!important;background:linear-gradient(135deg,#0a0d0d 0%,#0b1110 55%,#07100d 100%)!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:28px!important;box-shadow:0 35px 100px rgba(0,0,0,.55)!important;overflow:hidden!important;position:relative!important}
+.left.card:before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 0 58%,rgba(215,173,85,.045) 58.1%,transparent 74%);pointer-events:none}
+.left.card:after{content:"AUCTION NIGHT";position:absolute;right:34px;top:34px;color:rgba(255,255,255,.16);font-size:10px;font-weight:800;letter-spacing:5px;writing-mode:vertical-rl;pointer-events:none}
+.wheelbox{position:relative!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:stretch!important;min-height:620px!important;padding:80px 8vw 50px!important;z-index:1!important}
+.slotmachine{width:100%!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important}
+.slotHeader{width:100%!important;text-align:left!important;padding:0!important;font-size:11px!important;letter-spacing:5px!important;color:#d7ad55!important;font-weight:900!important;margin-bottom:30px!important}
+.slotHeader:after{content:"LIVE DRAW"!important;float:right!important;color:rgba(255,255,255,.42)!important;font-size:10px!important;letter-spacing:3px!important;padding:0!important}
+.slotWindow{position:relative!important;width:100%!important;height:250px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
+#wheel{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:hidden!important}
+#labels{display:none!important}
+.slotGlow{position:absolute!important;inset:0!important;background:linear-gradient(180deg,transparent 0%,rgba(7,9,9,.08) 100%)!important;z-index:1!important}
+.slotCenter{position:absolute!important;left:0!important;right:0!important;top:50%!important;height:auto!important;transform:translateY(-50%)!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;pointer-events:none!important;z-index:5!important;padding:30px 0!important}
+.slotCenter:before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,#d7ad55 22%,#d7ad55 78%,transparent);opacity:.8}
+.slotCenter:after{content:"";position:absolute;left:18%;right:18%;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(215,173,85,.7),transparent)}
+#slotSelectedName{position:relative!important;inset:auto!important;display:block!important;padding:0!important;color:#fff!important;font-size:clamp(46px,6vw,96px)!important;line-height:.95!important;font-weight:900!important;letter-spacing:-3px!important;text-align:center!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;text-shadow:0 10px 35px rgba(0,0,0,.65)!important}
+#slotSelectedName:empty:after{content:"READY"}
+.slotFooter{margin-top:28px!important;text-align:left!important;color:rgba(255,255,255,.36)!important;font-size:10px!important;letter-spacing:4px!important}
+.slotFooter:before{content:"01  /  PLAYER DRAW   •   ";color:#d7ad55}
+#drawWinner{width:100%!important;min-height:100px!important;margin:38px 0 0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;text-align:left!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important}
+#drawWinner .winnerKicker{font-size:10px!important;letter-spacing:4px!important;color:#d7ad55!important;margin-bottom:8px!important}
+#drawWinnerName{font-size:clamp(24px,2.3vw,38px)!important;color:rgba(255,255,255,.86)!important;font-weight:750!important;text-shadow:none!important}
+.controls{margin-top:28px!important;justify-content:flex-start!important;gap:12px!important;position:relative!important;z-index:4!important}
+.controls button{height:52px!important;min-width:160px!important;border-radius:8px!important;font-size:13px!important;letter-spacing:.6px!important;background:#d7ad55!important;color:#10100c!important;box-shadow:0 10px 30px rgba(0,0,0,.3)!important}
+.controls button:first-child{background:#f0d38b!important}
+.controls button.alt{background:rgba(255,255,255,.06)!important;color:#ddd7ca!important;border:1px solid rgba(255,255,255,.14)!important}
+.controls button:hover{transform:translateY(-2px)!important}
+.right.card{display:none!important}
+.stats{display:none!important}
+@media(max-width:900px){
+ .app{padding:12px!important}.left.card{min-height:calc(100vh - 105px)!important;border-radius:20px!important}.wheelbox{padding:70px 7vw 35px!important}.slotWindow{height:220px!important}#slotSelectedName{font-size:clamp(36px,8vw,68px)!important;letter-spacing:-2px!important}
+}
+</style>
+<style id="selected-player-stage">
+#drawWinner{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin-top:12px;}
+#drawWinnerPhoto{width:170px;height:210px;object-fit:cover;border-radius:18px;border:1px solid rgba(255,255,255,.14);background:#151922;box-shadow:0 16px 40px rgba(0,0,0,.35);overflow:hidden;}
+#drawWinnerPhoto.placeholder{display:flex;align-items:center;justify-content:center;font-size:58px;}
+#drawWinnerName{font-size:clamp(30px,3.2vw,52px);font-weight:900;line-height:1.05;text-align:center;}
+@media(max-width:900px){#drawWinnerPhoto{width:130px;height:160px;}#drawWinnerName{font-size:32px;}}
+</style>
+<style id="canva-poster-premium-theme">
+:root{
+  --bg:#f7f3ee;
+  --panel:#fffdf9;
+  --panel2:#f1e9df;
+  --line:#ded2c5;
+  --text:#241b2f;
+  --muted:#786d78;
+  --purple:#5b2a86;
+  --purple2:#7b3fb0;
+  --coral:#ef6f61;
+  --peach:#f6b38f;
+  --teal:#238b8b;
+  --cream:#fffaf2;
+}
+html,body{
+  background:
+    radial-gradient(circle at 8% 8%,rgba(123,63,176,.13),transparent 25%),
+    radial-gradient(circle at 92% 12%,rgba(239,111,97,.12),transparent 24%),
+    radial-gradient(circle at 82% 90%,rgba(35,139,139,.10),transparent 25%),
+    var(--bg)!important;
+  color:var(--text)!important;
+  font-family:Inter,Segoe UI,Arial,sans-serif!important;
+}
+header,.header,.topbar{
+  background:rgba(255,253,249,.94)!important;
+  color:var(--text)!important;
+  border-bottom:1px solid var(--line)!important;
+  box-shadow:0 8px 28px rgba(66,43,61,.08)!important;
+}
+.card,.panel,.modal-content,.box,.section{
+  background:rgba(255,253,249,.96)!important;
+  color:var(--text)!important;
+  border:1px solid var(--line)!important;
+  border-radius:22px!important;
+  box-shadow:0 14px 38px rgba(73,48,67,.10)!important;
+}
+button,.btn{
+  background:#fffaf4!important;
+  color:var(--text)!important;
+  border:1px solid #d9cabb!important;
+  border-radius:12px!important;
+  box-shadow:0 5px 14px rgba(73,48,67,.06)!important;
+  font-weight:750!important;
+}
+button:hover,.btn:hover{
+  border-color:var(--purple2)!important;
+  transform:translateY(-1px);
+}
+.primary,.primary-btn,.btn-primary{
+  background:linear-gradient(135deg,var(--purple),var(--purple2))!important;
+  color:#fff!important;
+  border:0!important;
+  box-shadow:0 10px 22px rgba(91,42,134,.22)!important;
+}
+h1,h2,h3{
+  color:var(--text)!important;
+  letter-spacing:-.035em!important;
+}
+input,select,textarea{
+  background:#fffdf9!important;
+  color:var(--text)!important;
+  border:1px solid #d8cbbf!important;
+  border-radius:11px!important;
+}
+input:focus,select:focus,textarea:focus{
+  outline:none!important;
+  border-color:var(--purple2)!important;
+  box-shadow:0 0 0 3px rgba(123,63,176,.10)!important;
+}
+
+/* Canva-style poster auction stage */
+#wheel{
+  background:
+    radial-gradient(circle at 15% 20%,rgba(246,179,143,.30),transparent 28%),
+    radial-gradient(circle at 85% 80%,rgba(35,139,139,.20),transparent 30%),
+    linear-gradient(135deg,#fffaf2 0%,#f3e8f5 52%,#eee3dc 100%)!important;
+  border:0!important;
+  border-radius:28px!important;
+  box-shadow:0 20px 55px rgba(73,48,67,.14)!important;
+  overflow:hidden!important;
+}
+#wheel::before,#wheel::after,
+.slotCenter::before,.slotCenter::after{
+  display:none!important;
+}
+.slotCenter{
+  background:transparent!important;
+  border:0!important;
+}
+#slotSelectedName{
+  color:var(--purple)!important;
+  text-shadow:none!important;
+  font-weight:1000!important;
+}
+#drawWinnerName{
+  color:var(--coral)!important;
+  letter-spacing:.10em!important;
+  font-weight:900!important;
+}
+.label{
+  background:rgba(255,253,249,.82)!important;
+  border:1px solid #ddcec0!important;
+  color:var(--text)!important;
+  border-radius:14px!important;
+}
+.badge,.tag{
+  background:rgba(91,42,134,.09)!important;
+  color:var(--purple)!important;
+  border:1px solid rgba(91,42,134,.16)!important;
+  border-radius:999px!important;
+}
+.sold{
+  color:var(--teal)!important;
+}
+.danger,.delete{
+  background:#fff0ee!important;
+  color:#b8473e!important;
+  border-color:#efc3bd!important;
+}
+nav,.sidebar,.side-panel{
+  background:#fffaf4!important;
+  border-color:var(--line)!important;
+}
+table{
+  background:#fffdf9!important;
+  color:var(--text)!important;
+  border-radius:16px!important;
+  overflow:hidden!important;
+}
+th{
+  background:#eee4f3!important;
+  color:var(--purple)!important;
+}
+td{
+  border-color:#eadfd4!important;
+}
+</style>
+<style id="bpl-header-update">
+header{
+  position:relative!important;
+}
+#mvpmBrand{
+  margin-left:auto!important;
+  padding:8px 16px!important;
+  border-radius:10px!important;
+  background:#5b2a86!important;
+  color:#fff!important;
+  font-size:15px!important;
+  font-weight:900!important;
+  letter-spacing:.12em!important;
+  box-shadow:0 7px 18px rgba(91,42,134,.16)!important;
+}
+</style>
+<style id="large-player-photo-stage">#projectorPlayerPhoto{position:relative;width:min(36vw,480px);height:min(50vh,580px);margin:0 auto 18px;display:none;align-items:center;justify-content:center;overflow:hidden;border-radius:24px;background:linear-gradient(145deg,#f4e8f4,#fffaf2);border:1px solid rgba(91,42,134,.18);box-shadow:0 22px 55px rgba(73,48,67,.18)}#projectorPlayerPhoto img{width:100%;height:100%;object-fit:cover;display:block}#projectorPlayerPhoto.no-photo{display:flex}#projectorPlayerPhoto.no-photo::after{content:"🏏";font-size:76px;opacity:.28}@media (max-width:900px){#projectorPlayerPhoto{width:min(55vw,360px);height:320px}}</style>
+<style id="main-projector-selected-stage">
+.slotWindow{height:520px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+.slotCenter{width:100%!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:20px!important;padding:20px 0!important}
+.slotCenter:before,.slotCenter:after{display:none!important}
+#projectorPlayerPhoto{display:none!important;width:min(36vw,460px)!important;height:min(48vh,500px)!important;margin:0!important;border-radius:24px!important;border:2px solid rgba(91,42,134,.28)!important;background:#fffaf2!important;box-shadow:0 22px 55px rgba(73,48,67,.18)!important;overflow:hidden!important}
+#projectorPlayerPhoto img{width:100%!important;height:100%!important;object-fit:cover!important}
+#slotSelectedName{font-size:clamp(52px,6vw,100px)!important;line-height:1!important;letter-spacing:-2px!important;color:#5b2a86!important;text-shadow:none!important;white-space:normal!important;max-width:95%!important}
+#drawWinner{display:none!important}
+@media(max-width:900px){.slotWindow{height:430px!important}#projectorPlayerPhoto{width:230px!important;height:285px!important}#slotSelectedName{font-size:clamp(38px,9vw,68px)!important}}
+</style>
+<style id="selected-player-projector-reveal">
+.slotmachine.revealed #projectorPlayerPhoto{display:flex!important;}
+.slotmachine.revealed #slotSelectedName{font-size:clamp(42px,5vw,82px)!important;color:#5b2a86!important;font-weight:1000!important;line-height:1.02!important;text-align:center!important;max-width:92%!important;}
+.slotmachine.revealed .slotHeader{color:#ef6f61!important;}
+@media(max-width:900px){.slotmachine.revealed #projectorPlayerPhoto{width:230px!important;height:285px!important;}.slotmachine.revealed #slotSelectedName{font-size:clamp(34px,8vw,64px)!important;}}
+</style>
+<style id="player-result-screen">#playerResultScreen{display:none;position:relative;width:100%;min-height:72vh;box-sizing:border-box;padding:36px;align-items:center;justify-content:center;gap:48px;border-radius:30px;background:linear-gradient(135deg,#fffaf2 0%,#f3e7f4 55%,#e7f1ef 100%);border:1px solid rgba(91,42,134,.14);box-shadow:0 24px 70px rgba(73,48,67,.16)}#playerResultScreen.active{display:flex}#playerResultPhoto{width:min(40vw,520px);height:min(68vh,650px);object-fit:cover;border-radius:26px;background:#eee5dc;box-shadow:0 18px 42px rgba(73,48,67,.18)}#playerResultInfo{max-width:560px;text-align:left}#playerResultEyebrow{color:#ef6f61;font-weight:900;font-size:15px;letter-spacing:.18em;margin-bottom:12px}#playerResultName{color:#5b2a86;font-size:clamp(42px,6vw,88px);line-height:.95;font-weight:1000;overflow-wrap:anywhere}#playerResultRole{margin-top:22px;display:inline-block;padding:10px 18px;border-radius:999px;background:#5b2a86;color:#fff;font-size:clamp(18px,2vw,26px);font-weight:900}#playerResultStatus{margin-top:24px;font-size:clamp(24px,3vw,42px);font-weight:1000}.sold{color:#238b8b}.unsold{color:#ef6f61}@media(max-width:800px){#playerResultScreen{flex-direction:column;padding:24px;gap:24px}#playerResultPhoto{width:min(70vw,360px);height:360px}#playerResultInfo{text-align:center}}</style>
+<style id="true-result-page">
+.slotmachine.result-page .slotHeader,.slotmachine.result-page .slotWindow,.slotmachine.result-page .slotFooter{display:none!important}
+.slotmachine.result-page + #playerResultScreen{display:flex!important}
+#playerResultScreen{min-height:560px!important}
+#playerResultActions{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px;align-items:center}
+#playerResultActions input,#playerResultActions select{padding:13px 14px;border-radius:12px;border:1px solid #d8cbbf;background:#fffdf9;color:#241b2f;min-width:150px}
+#playerResultActions button{padding:13px 20px;border-radius:12px;border:0;font-weight:900;cursor:pointer}
+#resultBidBtn{background:#5b2a86;color:#fff}
+#resultSoldBtn{background:#238b8b;color:#fff}
+#resultUnsoldBtn{background:#ef6f61;color:#fff}
+#playerResultBid{margin-top:16px;font-size:20px;font-weight:900;color:#5b2a86}
+#playerResultStatus{padding:10px 16px;border-radius:999px;width:max-content}
+</style>
+<style id="result-page-final-fix">
+.slotmachine.result-page + #playerResultScreen{
+  min-height:620px!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+.slotmachine.result-page + #playerResultScreen #playerResultPhoto{
+  width:min(34vw,430px)!important;
+  height:min(58vh,540px)!important;
+  object-fit:cover!important;
+}
+.slotmachine.result-page + #playerResultScreen #playerResultInfo{
+  max-width:560px!important;
+}
+.slotmachine.result-page + #playerResultScreen #playerResultName{
+  font-size:clamp(42px,6vw,88px)!important;
+}
+</style>
+<style id="photo-full-visible-final">
+/* Larger player photo + show the complete uploaded image */
+#projectorPlayerPhoto{
+  width:min(42vw,540px)!important;
+  height:min(62vh,680px)!important;
+  min-width:420px!important;
+  min-height:520px!important;
+  background:#fffaf2!important;
+  border-radius:28px!important;
+  padding:10px!important;
+  overflow:hidden!important;
+}
+#projectorPlayerPhoto img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  border-radius:20px!important;
+  background:#fffaf2!important;
+}
+#playerResultPhoto{
+  width:min(42vw,560px)!important;
+  height:min(68vh,700px)!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  padding:10px!important;
+  background:#fffaf2!important;
+  border-radius:28px!important;
+}
+@media(max-width:1100px){
+  #projectorPlayerPhoto{width:min(48vw,500px)!important;height:min(58vh,580px)!important;min-width:0!important;min-height:0!important}
+  #playerResultPhoto{width:min(45vw,500px)!important;height:min(60vh,580px)!important}
+}
+@media(max-width:900px){
+  #projectorPlayerPhoto{width:min(78vw,430px)!important;height:min(58vh,520px)!important;min-width:0!important;min-height:0!important}
+  .slotmachine.revealed #projectorPlayerPhoto{width:min(78vw,430px)!important;height:min(58vh,520px)!important}
+  #playerResultPhoto{width:min(82vw,430px)!important;height:min(62vh,520px)!important}
+}
+</style>
+
+<style id="full-image-viewer-style">
+#fullImageViewer{display:none;position:fixed;inset:0;z-index:99999;background:rgba(20,12,24,.92);align-items:center;justify-content:center;padding:28px;backdrop-filter:blur(8px);cursor:zoom-out}
+#fullImageViewer.active{display:flex}
+#fullImageViewer img{max-width:94vw;max-height:92vh;width:auto;height:auto;object-fit:contain;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.5);background:#fffaf2;cursor:default}
+#fullImageViewer .closeViewer{position:absolute;right:22px;top:18px;width:46px;height:46px;border-radius:50%;background:#fffaf2;color:#241b2f;border:1px solid #d8cbbf;font-size:24px;font-weight:900;cursor:pointer}
+#projectorPlayerPhoto,#playerResultPhoto,#prev,.thumb{cursor:zoom-in}
+#prev{object-fit:contain!important;background:#fffaf2!important}
+</style>
+
+<style id="player-count-numbering">
+.player-total-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0;padding:12px 14px;border-radius:12px;background:#f3e7f4;border:1px solid #ded2c5;color:#5b2a86;font-weight:900}
+.player-total-bar span{color:#241b2f}.player-no{min-width:34px;height:34px;border-radius:10px;background:#5b2a86;color:#fff;display:grid;place-items:center;font-weight:1000}
+</style>
+<style id="final-large-full-photo-4k">
+/* Large full-length player photo: preserve the complete uploaded image */
+#playerResultScreen.active{gap:52px!important;padding:28px 42px!important;}
+#playerResultScreen.active #playerResultPhoto{
+  width:min(44vw,620px)!important;
+  height:min(78vh,760px)!important;
+  min-width:460px!important;
+  min-height:560px!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  background:#fffaf2!important;
+  padding:10px!important;
+  border-radius:28px!important;
+  image-rendering:auto!important;
+  box-shadow:0 22px 60px rgba(73,48,67,.20)!important;
+}
+#projectorPlayerPhoto img{
+  object-fit:contain!important;
+  object-position:center center!important;
+  image-rendering:auto!important;
+}
+@media(max-width:1100px){
+  #playerResultScreen.active{gap:32px!important;padding:24px!important;}
+  #playerResultScreen.active #playerResultPhoto{width:min(46vw,560px)!important;height:min(70vh,650px)!important;min-width:0!important;min-height:0!important;}
+}
+@media(max-width:800px){
+  #playerResultScreen.active{flex-direction:column!important;}
+  #playerResultScreen.active #playerResultPhoto{width:min(86vw,460px)!important;height:min(65vh,560px)!important;min-width:0!important;min-height:0!important;}
+}
+</style>
+
+<style id="automatic-bid-stepper">
+#playerResultActions .bid-stepper{display:flex;align-items:center;gap:0;min-width:240px}
+#playerResultActions .bid-stepper #resultBidAmount{min-width:120px;width:120px;text-align:center;border-radius:0!important;font-weight:900;font-size:18px}
+#playerResultActions .bid-step-btn{width:52px;height:48px;padding:0!important;border-radius:12px!important;background:#5b2a86!important;color:#fff!important;font-size:28px!important;line-height:1;border:0!important;box-shadow:none!important}
+#playerResultActions .bid-step-btn:first-child{border-radius:12px 0 0 12px!important}
+#playerResultActions .bid-step-btn:last-child{border-radius:0 12px 12px 0!important}
+#playerResultActions .bid-step-btn:hover{background:#7b3fb0!important;transform:none!important}
+@media(max-width:800px){#playerResultActions .bid-stepper{width:100%;justify-content:center}#playerResultActions .bid-stepper #resultBidAmount{flex:1}}
+</style>
+</head>
+<body>
+<div id="fullImageViewer" aria-label="Full image viewer">
+  <button type="button" class="closeViewer" aria-label="Close">×</button>
+  <img id="fullImageViewerImg" alt="Full player image">
+</div>
+
+<header><div class="brand">🏏 BPL 8 Auction 2026</div><div class="top"><button class="alt" onclick="toggleManager()">⚙ Manage</button></div><div id="mvpmBrand">MVPM</div>
+</header>
+<main class="app">
+<div class="screen">
+<section class="card left">
+<div class="wheelbox">
+<div class="slotmachine">
+<div class="slotHeader">PLAYER DRAW</div>
+<div class="slotWindow">
+<div class="slotGlow"></div>
+<div id="wheel"><div id="labels"></div></div>
+<div class="slotCenter"><div aria-label="Selected player photo" id="projectorPlayerPhoto"><img alt="Selected player" id="projectorPlayerPhotoImg"/></div>
+
+<div id="slotSelectedName">READY</div></div>
+</div>
+<div class="slotFooter">RANDOM PLAYER SELECTION</div>
+<div aria-live="polite" id="drawWinner">
+<div class="winnerKicker">SELECTED PLAYER</div>
+<div class="drawWinnerPhoto placeholder" id="drawWinnerPhoto">🏏</div>
+<div id="drawWinnerName">—</div>
+</div>
+</div><div id="playerResultScreen"><img alt="Selected player photo" id="playerResultPhoto"/><div id="playerResultInfo"><div id="playerResultEyebrow">PLAYER SELECTED</div><div id="playerResultName"></div><div id="playerResultRole"></div><div id="playerResultBid">Current Bid: ₹ 0</div><div class="unsold" id="playerResultStatus">PENDING</div><div id="playerResultActions"><div class="bid-stepper"><button type="button" class="bid-step-btn" onclick="changeBid(-1)" aria-label="Decrease bid">−</button><input id="resultBidAmount" inputmode="decimal" readonly placeholder="Bid amount (Cr)"/><button type="button" class="bid-step-btn" onclick="changeBid(1)" aria-label="Increase bid">+</button></div><select id="resultBidTeam" onchange="autoUpdateResultBid()"><option value="">Select Team</option></select><button type="button" id="resultBidBtn" style="display:none" onclick="placeResultBid()">💰 BID</button><button type="button" id="resultSoldBtn" onclick="markResultSold()">✅ SOLD</button><button type="button" id="resultUnsoldBtn" onclick="markResultUnsold()">❌ UNSOLD</button></div></div></div>
+</div>
+<div class="controls"><button id="drawPlayerBtn" type="button" onclick="spin()">🎰 DRAW PLAYER</button><button class="alt" onclick="resetWheel()">Reset</button></div>
+<div class="stats" id="stats"></div>
+</section>
+<section class="card right">
+<div class="status" id="status">READY FOR AUCTION</div>
+<div class="placeholder" id="playerVisual">🏏</div>
+<div class="playername" id="pname">Spin to Select Player</div>
+<div class="role" id="prole">—</div>
+<div class="bid" id="currentBid">₹ 0</div>
+<div class="team" id="pteam">No player selected</div>
+<div class="auction" id="auctionPanel">
+<div class="bidrow">
+<input id="bidAmount" placeholder="Bid amount e.g. 2.5 Cr"/>
+<select id="bidTeam"><option value="">Select Team</option></select>
+<button class="big" onclick="placeBid()">💰 BID</button>
+</div>
+<div class="controls">
+<button class="big" onclick="markSold()">✅ SOLD</button>
+<button class="big red" onclick="markUnsold()">❌ UNSOLD</button>
+</div>
+<div class="teamcards" id="teamCards"></div>
+</div>
+</section>
+</div>
+<section class="manager" id="manager">
+<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><h2>Management</h2><button class="alt" onclick="toggleManager()">Close</button></div>
+<div class="managergrid">
+<div><h3>Teams &amp; Bidding Credits</h3><button onclick="openTeam()">＋ Add Team</button><div class="list" id="teamsList"></div></div>
+<div><h3>Players</h3><div class="player-total-bar"><span>📋 Total Players Added: <b id="totalPlayersCount">0</b></span><span>🎯 Available for Spin: <b id="availablePlayersCount">0</b></span></div><button onclick="openPlayer()">＋ Add Player</button><button class="alt" onclick="downloadPDF()">📄 Sold PDF</button><button class="alt" onclick="downloadUnsoldPDF()">📄 Unsold PDF</button><div class="list" id="playersList"></div></div>
+</div>
+<div style="margin-top:15px"><h3>Sold History</h3><div class="history" id="history"></div></div><div style="margin-top:15px"><h3>Unsold History</h3><div class="history" id="unsoldHistory"></div></div>
+</div>
+</section>
+</main>
+<div class="modal" id="modal"><div class="modalbox">
+<div style="display:flex;justify-content:space-between"><h2 id="mtitle">Add</h2><button class="alt" onclick="closeModal()">✕</button></div>
+<div id="form"></div></div></div>
+<script>
+// Players are added only by the user. No pre-added player names.
+let players = JSON.parse(localStorage.getItem("bpl8_user_players")||"[]");
+
+// Photos are stored in IndexedDB instead of localStorage so large images never
+// trigger the browser's ~5MB localStorage quota. The player metadata remains
+// in localStorage and the full compressed image remains available in the app.
+const PHOTO_DB_NAME="bpl8_photo_store_v1", PHOTO_DB_STORE="photos";
+let photoDBPromise=null;
+function openPhotoDB(){
+  if(photoDBPromise) return photoDBPromise;
+  photoDBPromise=new Promise((resolve,reject)=>{
+    try{
+      const req=indexedDB.open(PHOTO_DB_NAME,1);
+      req.onupgradeneeded=()=>{ if(!req.result.objectStoreNames.contains(PHOTO_DB_STORE)) req.result.createObjectStore(PHOTO_DB_STORE); };
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error||new Error("IndexedDB unavailable"));
+    }catch(e){reject(e);}
+  });
+  return photoDBPromise;
+}
+async function putPlayerPhoto(id,data){
+  if(!id||!data) return;
+  try{const db=await openPhotoDB(); await new Promise((res,rej)=>{const tx=db.transaction(PHOTO_DB_STORE,"readwrite");tx.objectStore(PHOTO_DB_STORE).put(data,String(id));tx.oncomplete=res;tx.onerror=()=>rej(tx.error);});}catch(e){console.warn("Photo store failed",e);}
+}
+async function getPlayerPhoto(id){
+  if(!id) return "";
+  try{const db=await openPhotoDB();return await new Promise((res,rej)=>{const tx=db.transaction(PHOTO_DB_STORE,"readonly");const q=tx.objectStore(PHOTO_DB_STORE).get(String(id));q.onsuccess=()=>res(q.result||"");q.onerror=()=>rej(q.error);});}catch(e){return "";}
+}
+async function deletePlayerPhoto(id){
+  if(!id) return;
+  try{const db=await openPhotoDB();await new Promise((res,rej)=>{const tx=db.transaction(PHOTO_DB_STORE,"readwrite");tx.objectStore(PHOTO_DB_STORE).delete(String(id));tx.oncomplete=res;tx.onerror=()=>rej(tx.error);});}catch(e){}
+}
+function metadataOnly(arr){
+  return arr.map(p=>{const q={...p};delete q.photo;delete q.image;delete q.imageData;delete q.photoData;return q;});
+}
+async function migratePhotoStorage(){
+  let changed=false;
+  for(const p of players){
+    if(p.photo){ await putPlayerPhoto(p.id,p.photo); p.photoKey=String(p.id); delete p.photo; changed=true; }
+    else if(p.photoKey && !p.photo){ const src=await getPlayerPhoto(p.photoKey); if(src) p.photo=src; }
+  }
+  // Keep photos out of localStorage permanently.
+  if(changed){
+    try{localStorage.setItem("bpl8_user_players",JSON.stringify(metadataOnly(players)));}catch(e){console.warn("Metadata migration save failed",e);}
+  }
+}
+
+let teams = JSON.parse(localStorage.getItem("ca_teams")||"[]");
+let sold=JSON.parse(localStorage.getItem("ca_sold")||"[]"),unsold=JSON.parse(localStorage.getItem("ca_unsold")||"[]"),selected=null,currentBid=0,currentTeam="",rot=0,busy=false;
+const $=x=>document.getElementById(x);
+function save(showError=true){
+  try{
+    // Never put image base64 data into localStorage. Photos live in IndexedDB.
+    const payloads={
+      players:JSON.stringify(metadataOnly(players)),
+      teams:JSON.stringify(teams),
+      sold:JSON.stringify(metadataOnly(sold)),
+      unsold:JSON.stringify(metadataOnly(unsold))
+    };
+    localStorage.setItem("bpl8_user_players",payloads.players);
+    localStorage.setItem("ca_teams",payloads.teams);
+    localStorage.setItem("ca_sold",payloads.sold);
+    localStorage.setItem("ca_unsold",payloads.unsold);
+    // Store any newly selected in-memory photos in IndexedDB without blocking UI.
+    [...players,...sold,...unsold].forEach(p=>{if(p&&p.photo)putPlayerPhoto(p.id,p.photo);});
+    return true;
+  }catch(e){
+    console.error("Save failed",e);
+    if(showError) alert("Data save nahi ho pa raha. Browser storage full hai. Photos ab IndexedDB mein save hote hain; purane data ko migrate karke dobara Save Player karo.");
+    return false;
+  }
+}
+function esc(x){return String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+function updateProjectorAutoInfo(){
+  const pc=document.getElementById("autoPlayerCount");
+  const tc=document.getElementById("autoTeamCount");
+  if(pc) pc.textContent = `${players.length} Player${players.length===1?"":"s"}`;
+  if(tc) tc.textContent = `${teams.length} Team${teams.length===1?"":"s"}`;
+}
+
+function render(){
+let n=players.length,seg=n?360/n:0,html="";players.forEach((p,i)=>html+=`<div class="label" style="transform:rotate(${i*seg}deg) translateX(2%)"><span>${esc(p.name||"—")}</span></div>`);$("labels").innerHTML=html;
+$("count")&&($("count").textContent=n);$("stats").innerHTML=`<div class="stat">Players<b>${n}</b></div><div class="stat">Sold<b>${sold.length}</b></div><div class="stat">Teams<b>${teams.length}</b></div><div class="stat">Available Budget<b>₹${teams.reduce((a,t)=>a+Number(t.credits||0),0).toFixed(1)} Cr</b></div>`;
+$("bidTeam").innerHTML='<option value="">Select Team</option>'+teams.map(t=>`<option value="${t.id}">${esc(t.name)} — ₹${Number(t.credits).toFixed(1)} Cr</option>`).join("");
+$("teamCards").innerHTML=teams.map(t=>`<div class="teamcard"><b>${esc(t.name)}</b><small>Credits</small><div>₹${Number(t.credits).toFixed(2)} Cr</div></div>`).join("");
+$("teamsList").innerHTML=teams.map(t=>`<div class="item"><div style="flex:1"><b>${esc(t.name)}</b><br><span class="muted">₹${Number(t.credits).toFixed(2)} Cr</span></div><button onclick="editTeam('${t.id}')">Edit</button><button onclick="downloadTeamPDF('${t.id}')">📄 Team PDF</button><button class="red" onclick="deleteTeam('${t.id}')">Delete</button></div>`).join("");
+$("totalPlayersCount")&&($("totalPlayersCount").textContent=n);$("availablePlayersCount")&&($("availablePlayersCount").textContent=n);
+$("playersList").innerHTML=players.map((p,i)=>{const isU=unsold.some(u=>String(u.id)===String(p.id));return `<div class="item"><div class="player-no">${i+1}</div>${p.photo?`<img class="thumb" src="${p.photo}">`:"🏏"}<div style="flex:1"><b>${esc(p.name||"—")}</b><br><span class="muted">${esc(p.role||"—")} · ${esc(p.price||"No price")}</span>${isU?`<br><span style="color:#ef6f61;font-weight:800">UNSOLD — not in spinner</span>`:""}</div>${isU?`<button onclick="readdUnsoldPlayer('${p.id}')">↩ Re-add to Spin</button>`:""}<button onclick="editPlayer('${p.id}')">Edit</button><button class="red" onclick="deletePlayer('${p.id}')">Delete</button></div>`}).join("");
+$("history").innerHTML=sold.length?sold.map((p,i)=>`<div class="item"><div style="flex:1"><b>${i+1}. ${esc(p.name||"Unnamed Player")}</b> — ${esc(p.team||"No team")} — <span style="color:#f5c542">${esc(p.price||"No bid")}</span><br><small class="muted">${esc(p.time||"")}</small></div><button type="button" onclick="readdSoldPlayer('${p.id}')">↩ Re-add to Spin</button></div>`).join(""):"<div class='muted'>No sold players yet.</div>";
+$("unsoldHistory").innerHTML=unsold.length?unsold.map((p,i)=>`<div class="item"><div style="flex:1"><b>${i+1}. ${esc(p.name||"Unnamed Player")}</b> — <span style="color:#ef6f61;font-weight:800">UNSOLD</span><br><small class="muted">${esc(p.time||"")}</small></div><button type="button" onclick="readdUnsoldPlayer('${p.id}')">↩ Re-add to Spin</button></div>`).join(""):"<div class='muted'>No unsold players yet.</div>";}
+
+
+function deletePlayerById(id){
+  const idx = players.findIndex(p => String(p.id) === String(id));
+  if(idx < 0) return false;
+  players.splice(idx,1);
+  localStorage.setItem("ca_players", JSON.stringify(players));
+  if(selected && String(selected.id) === String(id)){
+    selected=null; currentBid=0; currentTeam="";
+    if(typeof updateDrawWinner==="function") updateDrawWinner(null);
+    if(typeof updateSlotSelectedName==="function") updateSlotSelectedName(null);
+  }
+  if(typeof renderPlayers==="function") renderPlayers();
+  if(typeof render==="function") render();
+  return true;
+}
+
+function deleteTeamById(id){
+  const idx = teams.findIndex(t => String(t.id) === String(id));
+  if(idx < 0) return false;
+  teams.splice(idx,1);
+  save(false);
+  if(typeof renderTeams==="function") renderTeams();
+  if(typeof render==="function") render();
+  return true;
+}
+
+function updateDrawWinner(pl){
+  const el=document.getElementById("drawWinnerName");
+  const photo=document.getElementById("drawWinnerPhoto");
+  if(el) el.textContent = pl && pl.name ? pl.name : "—";
+  if(photo){
+    if(pl && pl.photo){
+      photo.outerHTML = `<img id="drawWinnerPhoto" class="drawWinnerPhoto" src="${pl.photo}" alt="Player photo">`;
+    }else{
+      photo.outerHTML = `<div id="drawWinnerPhoto" class="drawWinnerPhoto placeholder">🏏</div>`;
+    }
+  }
+}
+
+
+function updateSlotSelectedName(pl){
+  const el=document.getElementById("slotSelectedName");
+  if(el) el.textContent = pl && pl.name ? pl.name : "READY";
+}
+
+let resultPlayer=null;
+function openResultPage(p){
+  resultPlayer=p;
+  const sm=document.querySelector('.slotmachine'); if(sm) sm.classList.add('result-page');
+  const screen=document.getElementById('playerResultScreen'); if(screen) screen.classList.add('active');
+  const photo=document.getElementById('playerResultPhoto');
+  if(p.photo){photo.src=p.photo;photo.style.display='block';}else{photo.removeAttribute('src');photo.style.display='none';}
+  document.getElementById('playerResultName').textContent=p.name||'Unnamed Player';
+  document.getElementById('playerResultRole').textContent=p.role||'Player';
+  document.getElementById('playerResultBid').textContent='Current Bid: ₹ 0';
+  const st=document.getElementById('playerResultStatus'); st.textContent='PENDING'; st.className='unsold';
+  const sel=document.getElementById('resultBidTeam'); sel.innerHTML='<option value="">Select Team</option>'+teams.map(t=>`<option value="${t.id}">${esc(t.name)} — ₹${Number(t.credits).toFixed(1)} Cr</option>`).join('');
+  document.getElementById('resultBidAmount').value='0';
+}
+function bidStepUp(v){
+  v=Number(v)||0;
+  return v<100 ? Math.min(100,v+10) : v+20;
+}
+function bidStepDown(v){
+  v=Number(v)||0;
+  if(v<=0)return 0;
+  return v>100 ? Math.max(100,v-20) : Math.max(0,v-10);
+}
+function changeBid(direction){
+  if(!resultPlayer)return;
+  const input=document.getElementById('resultBidAmount');
+  const current=Number(input?.value)||Number(currentBid)||0;
+  const next=direction>0 ? bidStepUp(current) : bidStepDown(current);
+  if(input) input.value=next.toFixed(2).replace(/\.00$/,'');
+  autoUpdateResultBid();
+}
+function autoUpdateResultBid(){
+  if(!resultPlayer)return;
+  const tid=document.getElementById('resultBidTeam').value;
+  const amount=Number(document.getElementById('resultBidAmount').value)||0;
+  const t=tid?teams.find(x=>String(x.id)===String(tid)):null;
+  const bidText=document.getElementById('playerResultBid');
+  const status=document.getElementById('playerResultStatus');
+  if(bidText) bidText.textContent='Current Bid: ₹ '+amount.toFixed(2)+' Cr';
+  if(!t){
+    currentBid=amount;
+    currentTeam='';
+    if(status){status.textContent=amount>0?'SELECT TEAM':'PENDING';status.className='unsold';}
+    return;
+  }
+  if(amount>Number(t.credits||0)){
+    if(status){status.textContent='INSUFFICIENT CREDITS';status.className='unsold';}
+    return;
+  }
+  currentBid=amount;
+  currentTeam=t.name;
+  if(status){status.textContent=amount>0?'HIGHEST BID: '+t.name:'PENDING';status.className='unsold';}
+}
+function placeResultBid(){ autoUpdateResultBid(); }
+function closeResultPage(){
+  const sm=document.querySelector('.slotmachine');
+  const screen=document.getElementById('playerResultScreen');
+  if(sm) sm.classList.remove('result-page');
+  if(screen) screen.classList.remove('active');
+  const old=document.getElementById('slotSelectedName');
+  if(old) old.style.visibility='visible';
+}
+function markResultSold(){
+  const p = resultPlayer || selected;
+  if(!p && window.selected) { selected=window.selected; }
+  const player = p || selected;
+  if(!player){ alert('Pehle player spin karo.'); return; }
+
+  const bidEl=document.getElementById('resultBidAmount');
+  const teamEl=document.getElementById('resultBidTeam');
+  const entered=parseFloat(String(bidEl?.value||'').replace(/[^0-9.]/g,''));
+  const bid=Number.isFinite(entered) && entered>=0 ? entered : Number(currentBid)||0;
+  const team=teamEl?.value ? teams.find(t=>String(t.id)===String(teamEl.value)) : null;
+
+  if(team && bid>Number(team.credits||0)){
+    alert('Team ke paas enough credits nahi hain.');
+    return;
+  }
+
+  if(team) team.credits=Number(team.credits||0)-bid;
+
+  // Keep the master player record; SOLD status controls spinner availability.
+
+  // Save sold record.
+  const record={...player,sold:true,status:'SOLD',team:team?.name||'',price:bid>0?'₹ '+bid.toFixed(2)+' Cr':'',time:new Date().toLocaleString()};
+  const old=sold.findIndex(x=>String(x.id)===String(player.id));
+  if(old>=0) sold[old]=record; else sold.unshift(record);
+
+  resultPlayer=null; selected=null; currentBid=0; currentTeam=''; busy=false;
+  save();
+  render();
+
+  // Return immediately to the spinner.
+  const screen=document.getElementById('playerResultScreen');
+  const sm=document.querySelector('.slotmachine');
+  if(screen) screen.classList.remove('active');
+  if(sm) sm.classList.remove('result-page','revealed');
+  const name=document.getElementById('slotSelectedName');
+  if(name){name.style.visibility='visible';name.textContent='READY';}
+  const status=document.getElementById('status'); if(status) status.textContent='READY FOR AUCTION';
+  const cb=document.getElementById('currentBid'); if(cb) cb.textContent='₹ 0';
+  const msg=document.getElementById('playerResultStatus'); if(msg){msg.textContent='SOLD';msg.className='sold';}
+}
+
+function markResultUnsold(){
+  const p = resultPlayer || selected;
+  if(!p){alert('Pehle player select karo.');return;}
+  const existing=unsold.findIndex(x=>String(x.id)===String(p.id));
+  const record={...p,time:new Date().toLocaleString(),status:'UNSOLD'};
+  // Keep the master player record; UNSOLD status controls spinner availability.
+  if(existing>=0) unsold[existing]=record; else unsold.unshift(record);
+  resultPlayer=null;
+  selected=null;
+  currentBid=0;
+  currentTeam='';
+  busy=false;
+  save();
+  render();
+  const sm=document.querySelector('.slotmachine');
+  const screen=document.getElementById('playerResultScreen');
+  if(sm) sm.classList.remove('result-page','revealed');
+  if(screen) screen.classList.remove('active');
+  const oldName=document.getElementById('slotSelectedName');
+  if(oldName){oldName.style.visibility='visible';oldName.textContent='READY';}
+  const st=document.getElementById('status'); if(st) st.textContent='READY FOR AUCTION';
+  const cb=document.getElementById('currentBid'); if(cb) cb.textContent='₹ 0';
+  const pt=document.getElementById('pteam'); if(pt) pt.textContent='No player selected';
+  const pn=document.getElementById('pname'); if(pn) pn.textContent='Spin to Select Player';
+  const pr=document.getElementById('prole'); if(pr) pr.textContent='—';
+}
+
+function getAvailablePlayers(){
+  const soldIds=new Set(sold.map(x=>String(x.id)));
+  const unsoldIds=new Set(unsold.map(x=>String(x.id)));
+  return players.filter(p=>!soldIds.has(String(p.id)) && !unsoldIds.has(String(p.id)));
+}
+function spin(){
+  const available=getAvailablePlayers();
+  if(busy || !available.length){ if(!available.length) alert('Spinner mein available player nahi hai. Unsold list se Re-add karo.'); return; }
+  busy=true; document.querySelector('.slotmachine')?.classList.remove('revealed');
+  selected=null; currentBid=0; currentTeam=''; updateDrawWinner(null); updateSlotSelectedName(null);
+  $('status').textContent='DRAWING PLAYER...'; $('currentBid').textContent='₹ 0';
+  const duration=1800,start=performance.now(); let last=-1;
+  function tick(now){
+    if(!busy)return; const elapsed=now-start;
+    if(elapsed<duration){ let i=Math.floor(Math.random()*available.length); if(available.length>1&&i===last)i=(i+1)%available.length; last=i; updateSlotSelectedName(available[i]); const delay=28+Math.floor((elapsed/duration)*55); setTimeout(()=>requestAnimationFrame(tick),delay); return; }
+    selected=available[Math.floor(Math.random()*available.length)]; updateSlotSelectedName(selected); updateDrawWinner(selected); showSelected(); busy=false;
+  }
+  requestAnimationFrame(tick);
+}
+function showSelected(){
+  updateSlotSelectedName(selected);
+  let p=selected;
+  $("status").textContent="PLAYER SELECTED";
+  $("pname").textContent=p.name||"Unnamed Player";
+  $("prole").textContent=p.role||"—";
+  $("currentBid").textContent="₹ 0";
+  $("pteam").textContent="Waiting for auction result";
+  if(p.photo)$('playerVisual').outerHTML=`<img id="playerVisual" class="playerphoto" src="${p.photo}">`;
+  else $("playerVisual").outerHTML=`<div id="playerVisual" class="placeholder">🏏</div>`;
+  $("auctionPanel").classList.add("resultOnly");
+  openResultPage(p);
+}
+function placeBid(){if(!selected)return alert("Pehle player spin karo.");$("auctionPanel").classList.remove("resultOnly");let tid=$("bidTeam").value,amount=parseFloat(String($("bidAmount").value).replace(/[^0-9.]/g,""));if(!tid||!amount||amount<=0)return alert("Team aur valid bid amount select karo.");let t=teams.find(x=>x.id===tid);if(amount<=currentBid)return alert("New bid current bid se zyada honi chahiye.");if(amount>Number(t.credits))return alert("Is team ke paas enough credits nahi hain.");currentBid=amount;currentTeam=t.name;$("currentBid").textContent="₹ "+amount.toFixed(2)+" Cr";$("pteam").textContent="Highest Bid: "+t.name;render()}
+function closeResultAndReady(){
+  const drawBtn=document.getElementById('drawPlayerBtn'); if(drawBtn) drawBtn.disabled=false;
+  resultPlayer=null; selected=null; currentBid=0; currentTeam=''; busy=false;
+  document.querySelector('.slotmachine')?.classList.remove('result-page','revealed');
+  document.getElementById('playerResultScreen')?.classList.remove('active');
+  document.getElementById('auctionPanel')?.classList.remove('resultOnly');
+  const oldName=document.getElementById('slotSelectedName'); if(oldName){oldName.style.visibility='visible';oldName.textContent='READY';}
+  const st=document.getElementById('status'); if(st) st.textContent='READY FOR AUCTION';
+  const cb=document.getElementById('currentBid'); if(cb) cb.textContent='₹ 0';
+  const pt=document.getElementById('pteam'); if(pt) pt.textContent='No player selected';
+  const pn=document.getElementById('pname'); if(pn) pn.textContent='Spin to Select Player';
+  const pr=document.getElementById('prole'); if(pr) pr.textContent='—';
+  render();
+}
+function markSold(){
+  if(!selected){alert('Pehle player spin karo.');return;}
+  const soldPlayer={...selected};
+  const teamName=currentTeam||'';
+  const bid=Number(currentBid)||0;
+  if(teamName && bid>0){
+    const t=teams.find(x=>x.name===teamName);
+    if(t) t.credits=Math.max(0,Number(t.credits)-bid);
+  }
+  sold.unshift({...soldPlayer,price:bid>0?'₹ '+bid.toFixed(2)+' Cr':'',team:teamName,time:new Date().toLocaleString(),sold:true});
+  players=players.filter(p=>String(p.id)!==String(soldPlayer.id));
+  save(); render(); closeResultAndReady();
+}
+function markUnsold(){
+  if(!selected){alert('Pehle player spin karo.');return;}
+  const unsoldPlayer={...selected,status:'UNSOLD',time:new Date().toLocaleString()};
+  const i=unsold.findIndex(p=>String(p.id)===String(selected.id));
+  if(i>=0) unsold[i]=unsoldPlayer; else unsold.unshift(unsoldPlayer);
+  save(); render(); closeResultAndReady();
+}
+function resetWheel(){
+  busy=false; selected=null; resultPlayer=null; currentBid=0; currentTeam="";
+  $("labels").style.transition="none";
+  $("labels").style.transform="translateY(-50%)";
+  const sm=document.querySelector(".slotmachine"); if(sm) sm.classList.remove("result-page","revealed");
+  const screen=document.getElementById("playerResultScreen"); if(screen) screen.classList.remove("active");
+  const panel=document.getElementById("auctionPanel"); if(panel) panel.classList.remove("resultOnly");
+  const name=document.getElementById("slotSelectedName"); if(name){name.style.visibility="visible";name.textContent="READY";}
+  const st=document.getElementById("status"); if(st) st.textContent="READY FOR AUCTION";
+  const cb=document.getElementById("currentBid"); if(cb) cb.textContent="₹ 0";
+  const pt=document.getElementById("pteam"); if(pt) pt.textContent="No player selected";
+  const pn=document.getElementById("pname"); if(pn) pn.textContent="Spin to Select Player";
+  const pr=document.getElementById("prole"); if(pr) pr.textContent="—";
+  const drawBtn=document.getElementById("drawPlayerBtn"); if(drawBtn) drawBtn.disabled=false;
+}
+function fullscreen(){document.documentElement.requestFullscreen?.()}
+function toggleManager(){ $("manager").classList.toggle("on");window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"})}
+function openTeam(t){$("mtitle").textContent=t?"Edit Team":"Add Team";$("modal").classList.add("on");$("form").innerHTML=`<label>Team Name</label><input id="f1" value="${esc(t?.name||"")}"><label>Bidding Credits (Cr)</label><input id="f2" type="number" step=".01" value="${t?.credits??100}"><div class="buttons"><button onclick="saveTeam('${t?.id||""}')">Save</button><button class="alt" onclick="closeModal()">Cancel</button></div>`}
+function saveTeam(id){let n=$("f1").value.trim()||"Unnamed Team",c=Number($("f2").value)||0;if(id){let t=teams.find(x=>x.id===id);if(!t)return;t.name=n;t.credits=c}else teams.push({id:"t"+Date.now()+"_"+Math.random().toString(36).slice(2,8),name:n,credits:c});save(false);closeModal();render()}
+function editTeam(id){openTeam(teams.find(t=>t.id===id))}
+function deleteTeam(id){
+  id=String(id);
+  if(!teams.some(t=>String(t.id)===id)) return;
+  if(confirm("Delete this team?")){
+    teams=teams.filter(t=>String(t.id)!==id);
+    save();
+    render();
+  }
+}
+function openPlayer(p){
+  $("mtitle").textContent=p?"Edit Player":"Add Player";
+  $("modal").classList.add("on");
+  $("form").innerHTML=`
+    <label>Name (optional)</label>
+    <input id="f1" value="${esc(p?.name||"")}">
+
+    <label>Role (optional)</label>
+    <select id="f2">
+      <option value="">Select Role</option>
+      <option value="Batsman">Batsman</option>
+      <option value="Bowler">Bowler</option>
+      <option value="All-Rounder">All-Rounder</option>
+      <option value="Wicketkeeper">Wicketkeeper</option>
+    </select>
+
+    <label>Base / Price (optional)</label>
+    <input id="f3" value="${esc(p?.price||"")}">
+
+    <label>Photo (optional)</label>
+    <div id="drop" class="drop" tabindex="0">
+      <div style="font-size:28px">📸</div>
+      <b>Drag & Drop Photo</b>
+      <div class="muted">or click to choose a file • Ctrl+V to paste</div>
+      <input id="file" type="file" accept="image/*" style="display:none">
+      <img id="prev" class="photo" style="display:${p?.photo?"block":"none"};margin-top:10px;max-width:110px;max-height:110px;object-fit:cover" src="${p?.photo||""}">
+    </div>
+
+    <div class="buttons">
+      <button onclick="savePlayer('${p?.id||""}')">Save Player</button>
+      <button class="alt" onclick="closeModal()">Cancel</button>
+    </div>`;
+  setupDrop();
+}
+
+function setupDrop(){
+  const drop=$("drop"), file=$("file"), prev=$("prev");
+  if(!drop||!file) return;
+
+  function loadImage(f){
+    if(!f || !f.type.startsWith("image/")) return alert("Please choose an image file.");
+    const r=new FileReader();
+    r.onload=e=>{
+      const raw=e.target.result;
+      const img=new Image();
+      img.onload=()=>{
+        // Automatically resize/compress large photos before saving them.
+        // Keeps the full photo (no crop) while reducing localStorage usage.
+        const MAX=1600;
+        const srcW=img.naturalWidth||img.width;
+        const srcH=img.naturalHeight||img.height;
+        const scale=Math.min(1,MAX/Math.max(srcW,srcH));
+        const w=Math.max(1,Math.round(srcW*scale));
+        const h=Math.max(1,Math.round(srcH*scale));
+        const c=document.createElement("canvas");
+        c.width=w;c.height=h;
+        const ctx=c.getContext("2d",{alpha:false});
+        ctx.imageSmoothingEnabled=true;
+        ctx.imageSmoothingQuality="high";
+        ctx.fillStyle="#fff";
+        ctx.fillRect(0,0,w,h);
+        ctx.drawImage(img,0,0,w,h);
+
+        // Prefer WebP for much smaller storage; fall back to JPEG.
+        let compressed=c.toDataURL("image/webp",0.82);
+        if(!compressed.startsWith("data:image/webp")) compressed=c.toDataURL("image/jpeg",0.82);
+
+        // If still large, reduce quality automatically in steps.
+        const approxBytes=dataUrl=>Math.max(0,Math.round((dataUrl.length*3)/4));
+        let quality=0.82;
+        while(approxBytes(compressed)>350000 && quality>0.42){
+          quality=Math.max(0.42,quality-0.06);
+          const webp=c.toDataURL("image/webp",quality);
+          compressed=webp.startsWith("data:image/webp") ? webp : c.toDataURL("image/jpeg",quality);
+        }
+
+        file.dataset.imageData=compressed;
+        file.dataset.originalName=f.name||"photo";
+        file.dataset.compressed="1";
+        prev.src=compressed;
+        prev.style.display="block";
+        const sizeKB=Math.max(1,Math.round(approxBytes(compressed)/1024));
+        drop.querySelector(".muted").textContent=`Auto-compressed & ready to save • ${sizeKB} KB • full photo preserved`;
+      };
+      img.onerror=()=>{
+        // Keep a readable fallback if the browser cannot decode the image.
+        file.dataset.imageData=raw;
+        file.dataset.compressed="0";
+        prev.src=raw;
+        prev.style.display="block";
+      };
+      img.src=raw;
+    };
+    r.readAsDataURL(f);
+  }
+
+  drop.onclick=e=>{
+    if(e.target!==file) file.click();
+  };
+  drop.onkeydown=e=>{
+    if(e.key==="Enter"||e.key===" "){e.preventDefault();file.click();}
+  };
+  file.onchange=()=>{ if(file.files[0]) loadImage(file.files[0]); };
+
+  ["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{
+    e.preventDefault();drop.classList.add("drag");
+  }));
+  ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{
+    e.preventDefault();drop.classList.remove("drag");
+  }));
+  drop.addEventListener("drop",e=>{
+    const f=e.dataTransfer.files&&e.dataTransfer.files[0];
+    if(f){
+      try{
+        const dt=new DataTransfer();dt.items.add(f);file.files=dt.files;
+      }catch(_){}
+      loadImage(f);
+    }
+  });
+
+  document.addEventListener("paste",function pasteHandler(e){
+    if(!document.getElementById("drop")) return;
+    const items=e.clipboardData?.items||[];
+    for(const item of items){
+      if(item.type.startsWith("image/")){
+        const f=item.getAsFile();
+        if(f){loadImage(f);break;}
+      }
+    }
+  },{once:false});
+}
+
+function savePlayer(id){
+  const name=$("f1").value.trim();
+  const role=$("f2").value;
+  const price=$("f3").value.trim();
+  const old=players.find(p=>String(p.id)===String(id));
+  const file=$("file");
+  const imageData=file?.dataset.imageData || "";
+
+  const finish=(img)=>{
+    const pid=id || ("p"+Date.now()+"_"+Math.random().toString(36).slice(2,8));
+    const finalPhoto=img || old?.photo || "";
+    const x={
+      id:pid,
+      name:name,
+      role:role,
+      price:price,
+      team:"",
+      photo:finalPhoto,
+      photoKey:finalPhoto ? String(pid) : (old?.photoKey||"")
+    };
+    if(id && old) players=players.map(p=>String(p.id)===String(id)?x:p);
+    else players.push(x);
+    if(finalPhoto) putPlayerPhoto(pid,finalPhoto);
+    save();
+    closeModal();
+    render();
+  };
+
+  if(imageData) finish(imageData);
+  else if(file && file.files && file.files[0]) previewData(file.files[0],finish);
+  else finish("");
+}
+
+function editPlayer(id){openPlayer(players.find(p=>p.id===id))}
+function deletePlayer(id){
+  id=String(id);
+  if(!players.some(p=>String(p.id)===id)) return;
+  if(confirm("Delete this player?")){
+    players=players.filter(p=>String(p.id)!==id);
+    deletePlayerPhoto(id);
+    if(selected && String(selected.id)===id){
+      selected=null; currentBid=0; currentTeam="";
+      updateDrawWinner(null); updateSlotSelectedName(null);
+    }
+    save();
+    render();
+  }
+}
+function closeModal(){$("modal").classList.remove("on")}
+function readdSoldPlayer(id){
+  const idx=sold.findIndex(p=>String(p.id)===String(id));
+  if(idx<0){alert("Sold player nahi mila.");return;}
+  const record={...sold[idx]};
+  delete record.sold; delete record.status; delete record.team; delete record.price; delete record.time;
+  unsold=unsold.filter(p=>String(p.id)!==String(record.id));
+  const master=players.find(p=>String(p.id)===String(record.id));
+  if(!master) players.push(record);
+  sold.splice(idx,1);
+  selected=null; resultPlayer=null; busy=false; currentBid=0; currentTeam='';
+  save(); render();
+  const st=document.getElementById('status'); if(st) st.textContent='PLAYER RE-ADDED TO SPINNER';
+}
+function readdUnsoldPlayer(id){
+  const idx=unsold.findIndex(p=>String(p.id)===String(id));
+  if(idx<0){alert('Player unsold list mein nahi mila.');return;}
+  const record={...unsold[idx]};
+  delete record.time; delete record.status; delete record.sold;
+  const master=players.find(p=>String(p.id)===String(record.id));
+  if(!master) players.push(record);
+  unsold.splice(idx,1);
+  selected=null; resultPlayer=null; busy=false; currentBid=0; currentTeam='';
+  save(); render();
+  const st=document.getElementById('status'); if(st) st.textContent='PLAYER RE-ADDED TO SPINNER';
+}
+
+function pdfText(v){
+  return String(v??'').replace(/[\x00-\x1F\x7F-\uFFFF]/g,'?').replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)').replace(/[\r\n]+/g,' ');
+}
+function buildPDF(filename,title,lines){
+  try{
+    const rows = Array.isArray(lines) ? lines : [];
+    const perPage = 42;
+    const pagesData = [];
+    for(let i=0;i<rows.length;i+=perPage) pagesData.push(rows.slice(i,i+perPage));
+    if(!pagesData.length) pagesData.push([]);
+
+    const esc = v => String(v ?? '')
+      .replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)')
+      .replace(/[\r\n]+/g,' ')
+      .replace(/[^\x20-\x7E]/g,'?');
+
+    const objects = [];
+    const obj = value => { objects.push(value); return objects.length; };
+    const catalogId = obj('');
+    const pagesId = obj('');
+    const fontId = obj('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+    const pageIds = [];
+
+    pagesData.forEach((pageRows, pageIndex)=>{
+      let content='BT\n';
+      content += '/F1 17 Tf\n50 790 Td\n(' + esc(title) + ') Tj\n';
+      content += '/F1 9 Tf\n0 -24 Td\n(Page ' + (pageIndex+1) + ' of ' + pagesData.length + ') Tj\n';
+      let yStep=17;
+      for(const line of pageRows){
+        content += '/F1 10 Tf\n0 -' + yStep + ' Td\n(' + esc(line) + ') Tj\n';
+      }
+      content += 'ET\n';
+      const contentId = obj('<< /Length ' + new TextEncoder().encode(content).length + ' >>\nstream\n' + content + 'endstream');
+      const pageId = obj('<< /Type /Page /Parent ' + pagesId + ' 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ' + fontId + ' 0 R >> >> /Contents ' + contentId + ' 0 R >>');
+      pageIds.push(pageId);
+    });
+
+    objects[catalogId-1] = '<< /Type /Catalog /Pages ' + pagesId + ' 0 R >>';
+    objects[pagesId-1] = '<< /Type /Pages /Kids [' + pageIds.map(id=>id+' 0 R').join(' ') + '] /Count ' + pageIds.length + ' >>';
+
+    let pdf='%PDF-1.4\n%\xE2\xE3\xCF\xD3\n';
+    const offsets=[0];
+    for(let i=0;i<objects.length;i++){
+      offsets[i+1]=new TextEncoder().encode(pdf).length;
+      pdf+=(i+1)+' 0 obj\n'+objects[i]+'\nendobj\n';
+    }
+    const xrefOffset=new TextEncoder().encode(pdf).length;
+    pdf+='xref\n0 '+(objects.length+1)+'\n0000000000 65535 f \n';
+    for(let i=1;i<offsets.length;i++) pdf+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';
+    pdf+='trailer\n<< /Size '+(objects.length+1)+' /Root '+catalogId+' 0 R >>\nstartxref\n'+xrefOffset+'\n%%EOF\n';
+
+    const blob=new Blob([pdf],{type:'application/pdf'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=filename;
+    a.target='_blank';
+    a.rel='noopener';
+    a.style.position='fixed'; a.style.left='-9999px';
+    document.body.appendChild(a);
+    try { a.click(); } catch(e) { window.open(url,'_blank'); }
+    setTimeout(()=>{try{a.remove();}catch(e){}; try{URL.revokeObjectURL(url);}catch(e){}},10000);
+    return true;
+  }catch(err){
+    console.error(err);
+    alert('Sold PDF generate nahi ho paya: '+(err?.message||err));
+    return false;
+  }
+}
+function downloadPDF(){
+  const lines=[];
+  lines.push(`Generated: ${new Date().toLocaleString()}`,'');
+  if(!sold.length) lines.push('No sold players yet.');
+  sold.forEach((p,i)=>{
+    lines.push(`${i+1}. ${p.name||'Unnamed Player'}`);
+    lines.push(`   Role: ${p.role||'Not specified'} | Base Price: ${p.basePrice||p.priceBase||'Not specified'}`);
+    lines.push(`   Status: SOLD | Team: ${p.team||'No team'} | Bid: ${p.price||'No bid'}`);
+    lines.push(`   Sold At: ${p.time||'Not recorded'}`,'');
+  });
+  return buildPDF('BPL8_Auction_2026_Sold.pdf','BPL 8 Auction 2026 - SOLD PLAYERS',lines);
+}
+function downloadUnsoldPDF(){
+  const lines=[];
+  lines.push(`Generated: ${new Date().toLocaleString()}`,'');
+  if(!unsold.length) lines.push('No unsold players yet.');
+  unsold.forEach((p,i)=>{
+    lines.push(`${i+1}. ${p.name||'Unnamed Player'}`);
+    lines.push(`   Role: ${p.role||'Not specified'} | Base Price: ${p.basePrice||p.priceBase||'Not specified'}`);
+    lines.push(`   Status: UNSOLD | Team: ${p.team||'No team'} | Bid: ${p.price||'No bid'}`);
+    lines.push(`   Time: ${p.time||'Not recorded'}`,'');
+  });
+  return buildPDF('BPL8_Auction_2026_Unsold.pdf','BPL 8 Auction 2026 - UNSOLD PLAYERS',lines);
+}
+function downloadTeamPDF(teamId){
+  const team=teams.find(t=>String(t.id)===String(teamId));
+  if(!team){alert('Team nahi mili.');return false;}
+  const list=sold.filter(p=>String(p.team||'')===String(team.name));
+  const lines=[`Generated: ${new Date().toLocaleString()}`,`Team: ${team.name}`,`Remaining Credits: ${Number(team.credits||0).toFixed(2)} Cr`,''];
+  if(!list.length) lines.push('No sold players for this team yet.');
+  list.forEach((p,i)=>{
+    lines.push(`${i+1}. ${p.name||'Unnamed Player'}`);
+    lines.push(`   Role: ${p.role||'Not specified'} | Bid: ${p.price||'No bid'}`);
+    lines.push(`   Sold At: ${p.time||'Not recorded'}`,'');
+  });
+  const safeName=String(team.name).replace(/[^a-z0-9]+/gi,'_').replace(/^_+|_+$/g,'')||'Team';
+  return buildPDF(`BPL8_Auction_2026_${safeName}.pdf`,`BPL 8 Auction 2026 - ${team.name}`,lines);
+}
+
+function updateProjectorPlayerPhoto(player){
+  const box=document.getElementById("projectorPlayerPhoto");
+  const img=document.getElementById("projectorPlayerPhotoImg");
+  if(!box||!img)return;
+  const src=player&&(player.photo||player.image||player.imageData||player.photoData);
+  if(src){img.src=src;img.style.display="block";box.classList.remove("no-photo");box.style.display="flex";}
+  else{img.removeAttribute("src");img.style.display="none";box.classList.add("no-photo");box.style.display="flex";}
+}
+
+(function(){
+  function syncProjectorPhoto(){
+    if(typeof selected!=="undefined" && selected) updateProjectorPlayerPhoto(selected);
+  }
+  document.addEventListener("click",()=>setTimeout(syncProjectorPhoto,80));
+})();
+
+// Restore saved photos from IndexedDB, migrate any older inline photos, then render.
+(async()=>{
+  await migratePhotoStorage();
+  for(const p of players){
+    if(!p.photo && p.photoKey){const src=await getPlayerPhoto(p.photoKey);if(src)p.photo=src;}
+  }
+  for(const list of [sold,unsold]){
+    for(const p of list){if(!p.photo && p.photoKey){const src=await getPlayerPhoto(p.photoKey);if(src)p.photo=src;}}
+  }
+  render();
+  updateProjectorAutoInfo();
+})();
+</script>
+<div id="projectorAutoInfo" style="margin:14px auto 0;text-align:center;font-size:13px;color:#9aa69f;letter-spacing:.5px"><span id="autoPlayerCount">0 Players</span><span style="opacity:.45"> • </span><span id="autoTeamCount">0 Teams</span></div>
+
+<script>window.markResultSold=markResultSold; window.markResultUnsold=markResultUnsold;</script>
+
+<script id="global-pdf-handlers">
+window.downloadPDF=downloadPDF;
+window.downloadUnsoldPDF=downloadUnsoldPDF;
+window.downloadTeamPDF=downloadTeamPDF;
+window.readdSoldPlayer=readdSoldPlayer;
+window.readdUnsoldPlayer=readdUnsoldPlayer;
+</script>
+
+<script id="full-image-viewer-script">
+(function(){
+  const viewer=document.getElementById('fullImageViewer');
+  const big=document.getElementById('fullImageViewerImg');
+  if(!viewer||!big)return;
+  function openFull(src){
+    if(!src)return;
+    big.src=src;
+    viewer.classList.add('active');
+    document.body.style.overflow='hidden';
+  }
+  function closeFull(){
+    viewer.classList.remove('active');
+    big.removeAttribute('src');
+    document.body.style.overflow='';
+  }
+  document.addEventListener('click',function(e){
+    const img=e.target.closest('#projectorPlayerPhoto img,#playerResultPhoto,#prev,.thumb');
+    if(img && img.src){ e.preventDefault(); e.stopPropagation(); openFull(img.src); return; }
+    if(e.target===viewer || e.target.classList.contains('closeViewer')) closeFull();
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeFull();});
+  big.addEventListener('click',function(e){e.stopPropagation();});
+})();
+</script>
+</body></html>

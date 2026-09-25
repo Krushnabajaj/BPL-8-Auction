@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BPL 8 Auction 2026 — Live Display</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="sponsorBar">
+  <div class="sponsorChip"><span class="sponsorLabel">Title Sponsor</span><img src="assets/casorra.jpg" alt="Casorra"></div>
+  <div class="sponsorChip"><span class="sponsorLabel">Co-Title Sponsor</span><img src="assets/chai-katta.png" alt="Chai Katta"></div>
+  <div class="sponsorChip"><span class="sponsorLabel">Community Partner</span><img src="assets/mvpm.jpg" alt="MVPM"></div>
+</div>
+<header class="topbar"><div class="brand">🏏 BPL 8 <span>Auction 2026</span></div><div id="playerCount" class="muted"></div></header>
+<main class="app">
+  <div class="stage" id="stageEl">
+    <section class="card playerCard" id="playerCardEl">
+      <div id="photoBox" class="playerPhoto placeholder">🏏</div>
+      <div class="playerName" id="pname">Waiting for auctioneer…</div>
+      <div class="playerRole" id="prole" style="display:none"></div>
+      <div class="bidAmount" id="bidAmount"></div>
+      <div class="leadingTeam" id="leadingTeam"></div>
+    </section>
+    <section class="card">
+      <h3>Teams</h3>
+      <div class="teamGrid" id="teamGrid"></div>
+      <h3 style="margin-top:16px">Recently Sold</h3>
+      <div class="soldTicker" id="soldTicker"><p class="muted">No sales yet.</p></div>
+    </section>
+  </div>
+  <div class="card completeHero" id="completeScreen" style="display:none">
+    <h2>🏆 Auction Complete</h2>
+    <p class="muted">All players have been drawn. Final squads:</p>
+    <div class="squadSummary" id="squadSummary"></div>
+  </div>
+</main>
+<footer class="foot">BPL 8 Auction 2026 — presented by CASORRA &amp; Chai Katta</footer>
+<div class="connBadge" id="connBadge">🔴 Reconnecting…</div>
+<div class="broadcastOverlay" id="broadcastOverlay">
+  <div class="sponsorReelHost" id="overlayReelHost"></div>
+</div>
+
+<script type="module">
+  import { watchSettings, watchTeams, watchPlayers, watchAuctionCurrent, watchHistory, watchConnection, watchBroadcastOverlay } from './js/db.js';
+  import { formatMoney, maxBidForTeam, isPoolExhausted } from './js/auction-core.js';
+  import { runSpinAnimation } from './js/spinner.js';
+  import { createPhotoView } from './js/photo-view.js';
+  import { prefetchPhotos } from './js/photo-cache.js';
+  import { maybePlaySponsorIntro } from './js/sponsor-intro.js';
+  import { createSponsorReel } from './js/sponsor-reel.js';
+  import { SPONSOR_SLIDES } from './js/sponsor-media.js';
+  import { pulse, flash, confettiBurst } from './js/fx.js';
+  import { playSoldChime, playUnsoldTone } from './js/sound.js';
+
+  maybePlaySponsorIntro(() => {});
+  const overlayReel = createSponsorReel(document.getElementById('overlayReelHost'), SPONSOR_SLIDES, { includeVideo: true });
+  let overlayActive = false;
+
+  let settings = {}, teams = [], players = [], auction = { status: 'idle' };
+  let lastAnimatedAuctionKey = null, lastBid = null, lastHistoryKey = undefined;
+
+  const $ = (id) => document.getElementById(id);
+  const showPhoto = createPhotoView($('photoBox'));
+
+  function renderTeams() {
+    $('teamGrid').innerHTML = teams.map((t) => {
+      const full = (t.boughtCount || 0) >= (settings.squadSize || 7) - 1;
+      const leading = auction.leadingTeamId === t.id;
+      return `<div class="teamTile${leading ? ' leading' : ''}"><b>${esc(t.name)}</b>
+        <div>${formatMoney(t.purse || 0)} left</div>
+        <div class="muted">${t.boughtCount || 0}/${(settings.squadSize || 7) - 1} bought</div>
+        ${full ? '<div class="full">SQUAD FULL</div>' : `<div class="muted">Max bid: ${formatMoney(maxBidForTeam(t, settings))}</div>`}
+      </div>`;
+    }).join('') || '<p class="muted">No teams yet.</p>';
+  }
+
+  function renderProgress() {
+    const auctionable = players.filter((p) => !p.isCaptain);
+    const sold = auctionable.filter((p) => p.status === 'sold').length;
+    $('playerCount').textContent = `${sold} of ${auctionable.length} sold`;
+  }
+
+  function renderTicker(history) {
+    const sold = history.filter((h) => h.type === 'sold').slice(0, 5);
+    $('soldTicker').innerHTML = sold.length ? sold.map((h) => {
+      const p = players.find((x) => x.id === h.playerId);
+      const t = teams.find((x) => x.id === h.teamId);
+      return `<div class="tickerRow"><span>${esc(p?.name || 'Unnamed Player')}</span><b>${esc(t?.name || '?')} · ${formatMoney(h.price || 0)}</b></div>`;
+    }).join('') : '<p class="muted">No sales yet.</p>';
+  }
+
+  function renderCompletion() {
+    const done = isPoolExhausted(players) && auction.status === 'idle' && players.length > 0;
+    $('stageEl').style.display = done ? 'none' : 'grid';
+    $('completeScreen').style.display = done ? 'block' : 'none';
+    if (!done) return;
+    $('squadSummary').innerHTML = teams.map((t) => {
+      const squad = players.filter((p) => p.teamId === t.id && !p.isCaptain);
+      const captain = players.find((p) => p.id === t.captainPlayerId);
+      return `<div class="card"><b>${esc(t.name)}</b><div class="muted">Captain: ${esc(captain?.name || '—')}</div>
+        <ul style="padding-left:18px;margin:8px 0 0">${squad.map((p) => `<li>${esc(p.name)} — ${formatMoney(p.price || 0)}</li>`).join('') || '<li class="muted">No players bought</li>'}</ul></div>`;
+    }).join('');
+  }
+
+  function esc(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function showPlayer(p) {
+    $('pname').textContent = p ? (p.name || 'Unnamed Player') : 'Waiting for auctioneer…';
+    if (p && p.role) { $('prole').style.display = 'inline-block'; $('prole').textContent = p.role; }
+    else $('prole').style.display = 'none';
+    showPhoto(p);
+  }
+
+  function renderAuction() {
+    const p = players.find((x) => x.id === auction.playerId);
+    $('playerCardEl').classList.toggle('spinning', auction.status === 'spinning');
+    if (auction.status === 'idle' || !p) {
+      showPlayer(null);
+      if (auction.status === 'idle') {
+        $('photoBox').classList.remove('placeholder');
+        $('photoBox').innerHTML = `<img src="assets/sponsors/bpl-banner.jpg" alt="BPL 8" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block">`;
+      }
+      $('bidAmount').textContent = '';
+      $('leadingTeam').textContent = '';
+      return;
+    }
+    if (auction.status === 'spinning') {
+      const key = `${auction.playerId}-${auction.spinStartedAt}`;
+      if (key !== lastAnimatedAuctionKey) {
+        lastAnimatedAuctionKey = key;
+        const pool = players.filter((x) => x.status === 'pool');
+        runSpinAnimation(pool.length ? pool : [p], p, auction.spinStartedAt, {
+          onTick: (tp) => { $('pname').textContent = tp.name || 'Unnamed Player'; },
+          onDone: () => showPlayer(p),
+        });
+      }
+      $('bidAmount').textContent = '';
+      $('leadingTeam').textContent = '';
+      return;
+    }
+    showPlayer(p);
+    const bid = auction.bid || settings.base || 0;
+    $('bidAmount').textContent = formatMoney(bid);
+    if (lastBid !== null && bid !== lastBid) pulse($('bidAmount'));
+    lastBid = bid;
+    const leader = teams.find((t) => t.id === auction.leadingTeamId);
+    $('leadingTeam').textContent = leader ? `Leading: ${leader.name}` : 'No bids yet — base price';
+  }
+
+  let historyCache = [];
+  watchSettings((s) => { settings = s; renderTeams(); renderAuction(); });
+  watchTeams((t) => { teams = t; renderTeams(); renderAuction(); renderCompletion(); renderTicker(historyCache); });
+  watchPlayers((p) => { players = p; renderProgress(); renderAuction(); renderCompletion(); prefetchPhotos(p); });
+  watchAuctionCurrent((a) => { auction = a; renderAuction(); renderCompletion(); });
+  watchHistory((h) => {
+    historyCache = h;
+    renderTicker(h);
+    if (lastHistoryKey === undefined) { lastHistoryKey = h[0]?.id ?? null; return; }
+    if (h.length && h[0].id !== lastHistoryKey) {
+      lastHistoryKey = h[0].id;
+      if (h[0].type === 'sold') { flash($('playerCardEl'), 'rgba(45,212,191,.5)'); confettiBurst($('playerCardEl')); playSoldChime(); }
+      else if (h[0].type === 'unsold') { flash($('playerCardEl'), 'rgba(230,57,70,.5)'); playUnsoldTone(); }
+    }
+  });
+  watchConnection((connected) => $('connBadge').classList.toggle('show', !connected));
+  watchBroadcastOverlay((active) => {
+    $('broadcastOverlay').classList.toggle('show', active);
+    if (active && !overlayActive) overlayReel.start();
+    else if (!active && overlayActive) overlayReel.stop();
+    overlayActive = active;
+  });
+</script>
+</body>
+</html>
