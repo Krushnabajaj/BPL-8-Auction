@@ -26,7 +26,7 @@ function playSponsorIntro(onDone) {
     </div>
     <div class="sponsorIntroSlide">
       <div class="sponsorIntroLabel">Title Sponsor</div>
-      <div class="sponsorIntroLogoChip"><img src="assets/casorra.jpg" alt="Casorra"></div>
+      <div class="sponsorIntroLogoChip"><img src="assets/casorra.jpg" alt="Casorra" class="logoCasorra"></div>
     </div>
     <div class="sponsorIntroSlide">
       <div class="sponsorIntroLabel">Co-Title Sponsor</div>

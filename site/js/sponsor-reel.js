@@ -2,7 +2,7 @@
 // showcase) and the in-app broadcast overlay (display.html/admin.html/captain.html).
 // Renders into rootEl, autoplays, loops forever.
 
-const DURATIONS = { title: 5000, logos: 5000, image: 7000 };
+const DURATIONS = { title: 5000, logo: 6000, image: 7000 };
 
 export function createSponsorReel(rootEl, slides, opts = {}) {
   const includeVideo = opts.includeVideo !== false;
@@ -17,15 +17,22 @@ export function createSponsorReel(rootEl, slides, opts = {}) {
   let progressStart = 0;
   let progressDuration = 0;
   let pausedAt = 0;
+  let labelEl, stageEl, barEl;
 
-  rootEl.innerHTML = `
-    <div class="sponsorReelLabel"></div>
-    <div class="sponsorReelStage"></div>
-    <div class="sponsorReelProgress"><div class="sponsorReelBar"></div></div>
-  `;
-  const labelEl = rootEl.querySelector('.sponsorReelLabel');
-  const stageEl = rootEl.querySelector('.sponsorReelStage');
-  const barEl = rootEl.querySelector('.sponsorReelBar');
+  // stop() clears rootEl entirely (see below), so start() must remount this skeleton fresh
+  // every time — caching these elements just once at creation time left them detached (and
+  // invisible) on every restart after the first, which is what caused the "blank black
+  // screen the 2nd time the overlay was shown" bug.
+  function mount() {
+    rootEl.innerHTML = `
+      <div class="sponsorReelLabel"></div>
+      <div class="sponsorReelStage"></div>
+      <div class="sponsorReelProgress"><div class="sponsorReelBar"></div></div>
+    `;
+    labelEl = rootEl.querySelector('.sponsorReelLabel');
+    stageEl = rootEl.querySelector('.sponsorReelStage');
+    barEl = rootEl.querySelector('.sponsorReelBar');
+  }
 
   function clearTimer() {
     if (timer) { clearTimeout(timer); timer = null; }
@@ -74,12 +81,10 @@ export function createSponsorReel(rootEl, slides, opts = {}) {
         </div>`;
       startProgress(DURATIONS.image);
       timer = setTimeout(advance, DURATIONS.image);
-    } else if (slide.type === 'logos') {
-      stageEl.innerHTML = `<div class="sponsorReelLogos">${slide.items
-        .map((it) => `<div class="sponsorReelLogoItem"><div class="sponsorReelLogoChip"><img src="${it.src}" alt=""></div><span>${it.label || ''}</span></div>`)
-        .join('<div class="sponsorReelLogoSep"></div>')}</div>`;
-      startProgress(DURATIONS.logos);
-      timer = setTimeout(advance, DURATIONS.logos);
+    } else if (slide.type === 'logo') {
+      stageEl.innerHTML = `<div class="sponsorReelLogoBig"><img src="${slide.src}" alt="" class="${slide.imgClass || ''}"></div>`;
+      startProgress(DURATIONS.logo);
+      timer = setTimeout(advance, DURATIONS.logo);
     } else if (slide.type === 'video') {
       stageEl.innerHTML = `<video class="sponsorReelVideo" src="${slide.src}" playsinline></video>`;
       videoEl = stageEl.querySelector('video');
@@ -102,6 +107,7 @@ export function createSponsorReel(rootEl, slides, opts = {}) {
 
   function start() {
     if (!activeSlides.length) return;
+    mount();
     running = true;
     paused = false;
     index = 0;
@@ -111,6 +117,7 @@ export function createSponsorReel(rootEl, slides, opts = {}) {
   function stop() {
     running = false;
     clearTimer();
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     if (videoEl) videoEl.pause();
     videoEl = null;
     rootEl.innerHTML = '';

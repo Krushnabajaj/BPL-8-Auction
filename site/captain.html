@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="sponsorBar compact">
-  <div class="sponsorChip"><span class="sponsorLabel">Title Sponsor</span><img src="assets/casorra.jpg" alt="Casorra"></div>
+  <div class="sponsorChip"><span class="sponsorLabel">Title Sponsor</span><img src="assets/casorra.jpg" alt="Casorra" class="logoCasorra"></div>
   <div class="sponsorChip"><span class="sponsorLabel">Co-Title Sponsor</span><img src="assets/chai-katta.png" alt="Chai Katta"></div>
   <div class="sponsorChip"><span class="sponsorLabel">Community Partner</span><img src="assets/mvpm.jpg" alt="MVPM"></div>
 </div>
@@ -18,6 +18,7 @@
 </header>
 <div class="connBadge" id="connBadge">🔴 Reconnecting…</div>
 <div class="broadcastOverlay" id="broadcastOverlay">
+  <button type="button" class="skipOverlayBtn" id="skipOverlayBtn">✕ Skip</button>
   <div class="sponsorReelHost" id="overlayReelHost"></div>
 </div>
 <main class="app captainLayout">
@@ -154,7 +155,10 @@
     const t = myTeam();
     if (!t || !auction.playerId) return;
     $('bidBtn').disabled = true;
-    const ok = await placeBid(auction.playerId, myTeamId, t, settings);
+    // Snapshot the price shown on the button right now — if it's moved server-side by the
+    // time this lands, placeBid kills the attempt instead of silently bidding a higher tier.
+    const expectedBid = auction.bid || 0;
+    const ok = await placeBid(auction.playerId, myTeamId, t, settings, expectedBid);
     if (ok) playBidBeep();
     else $('bidHint').textContent = 'Bid rejected — someone else may have bid first. Try again.';
     renderAuction(); // always resync the button — a rejected bid writes nothing, so no watcher would otherwise re-enable it
@@ -162,6 +166,15 @@
 
   let lastHistoryKey;
   let overlayActive = false;
+  let overlaySkipped = false; // this captain's own local dismissal — does not affect admin/display
+  function updateOverlayVisibility() {
+    $('broadcastOverlay').classList.toggle('show', overlayActive && !overlaySkipped);
+  }
+  $('skipOverlayBtn').addEventListener('click', () => {
+    overlaySkipped = true;
+    overlayReel.stop();
+    updateOverlayVisibility();
+  });
   function startWatching() {
     watchSettings((s) => { settings = s; renderStats(); renderAuction(); renderLivePanel(); });
     watchTeams((t) => { teams = t; renderStats(); renderSquad(); renderAuction(); renderLivePanel(); });
@@ -179,10 +192,14 @@
     });
     watchConnection((connected) => $('connBadge').classList.toggle('show', !connected));
     watchBroadcastOverlay((active) => {
-      $('broadcastOverlay').classList.toggle('show', active);
-      if (active && !overlayActive) overlayReel.start();
-      else if (!active && overlayActive) overlayReel.stop();
+      if (active && !overlayActive) {
+        overlaySkipped = false; // fresh "show" instruction from admin — clear any previous skip
+        overlayReel.start();
+      } else if (!active && overlayActive) {
+        overlayReel.stop();
+      }
       overlayActive = active;
+      updateOverlayVisibility();
     });
   }
 </script>

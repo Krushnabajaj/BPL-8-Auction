@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="sponsorBar">
-  <div class="sponsorChip"><span class="sponsorLabel">Title Sponsor</span><img src="assets/casorra.jpg" alt="Casorra"></div>
+  <div class="sponsorChip"><span class="sponsorLabel">Title Sponsor</span><img src="assets/casorra.jpg" alt="Casorra" class="logoCasorra"></div>
   <div class="sponsorChip"><span class="sponsorLabel">Co-Title Sponsor</span><img src="assets/chai-katta.png" alt="Chai Katta"></div>
   <div class="sponsorChip"><span class="sponsorLabel">Community Partner</span><img src="assets/mvpm.jpg" alt="MVPM"></div>
 </div>
@@ -54,7 +54,9 @@
   import { playSoldChime, playUnsoldTone } from './js/sound.js';
 
   maybePlaySponsorIntro(() => {});
-  const overlayReel = createSponsorReel(document.getElementById('overlayReelHost'), SPONSOR_SLIDES, { includeVideo: true });
+  // Video is excluded from the automatic overlay rotation — it's played separately (see
+  // sponsors.html), so the projector overlay just cycles the banner/logo photos.
+  const overlayReel = createSponsorReel(document.getElementById('overlayReelHost'), SPONSOR_SLIDES, { includeVideo: false });
   let overlayActive = false;
 
   let settings = {}, teams = [], players = [], auction = { status: 'idle' };

@@ -21,7 +21,7 @@ import {
   increment,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
 import { firebaseConfig } from './firebase-config.js';
-import { nextBidAmount, maxBidForTeam } from './auction-core.js';
+import { nextBidAmount, maxBidForTeam, bidBaseUnchanged, bidLogWithoutLast } from './auction-core.js';
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -148,6 +148,17 @@ export function openBidding() {
   return update(ref(db, 'auction/current'), { status: 'bidding' });
 }
 
+// Reverts a captain's mis-tap mid-bidding — rolls auction/current back to whatever it was
+// before the most recent bid (or to base/no-leader if that was the only bid so far). Admin-only,
+// distinct from undoLast() below which corrects a completed sold/unsold result.
+export async function undoLastBid() {
+  const snap = await get(ref(db, 'auction/current'));
+  const current = snap.val();
+  if (!current || current.status !== 'bidding' || !current.bidLog || !Object.keys(current.bidLog).length) return false;
+  await update(ref(db, 'auction/current'), bidLogWithoutLast(current.bidLog));
+  return true;
+}
+
 // Resets a draw that never should have happened (wrong player, admin misclick) — touches
 // nothing else: no history entry, no player status change, the player stays in the pool.
 export function cancelDraw() {
@@ -232,6 +243,23 @@ export async function editSoldPlayer(playerId, newTeamId, newPrice) {
   await update(ref(db), updates);
 }
 
+// Directly assigns a Pool or Unsold player to a team at a price, without running them through
+// the live draw/bid flow — e.g. a sale agreed verbally, or a data-entry correction. Writes a
+// history entry too, so it shows up in the sold ticker, live panel, and PDF exports exactly
+// like a normal live sale.
+export async function markPlayerSoldDirect(playerId, teamId, price) {
+  const updates = {
+    [`players/${playerId}/status`]: 'sold',
+    [`players/${playerId}/teamId`]: teamId,
+    [`players/${playerId}/price`]: price,
+    [`teams/${teamId}/purse`]: increment(-price),
+    [`teams/${teamId}/boughtCount`]: increment(1),
+  };
+  const historyKey = push(ref(db, 'history')).key;
+  updates[`history/${historyKey}`] = { playerId, teamId, price, at: serverTimestamp(), type: 'sold' };
+  await update(ref(db), updates);
+}
+
 // Fully reverts any past sale (not just the most recent) — refunds the team and puts the
 // player back in the draw pool.
 export async function revertSoldPlayer(playerId) {
@@ -266,13 +294,19 @@ export function readdUnsoldToPool() {
 }
 
 // ---------- Captain: bidding ----------
-// Uses a transaction so two captains bidding at the same instant cannot both win —
-// the loser's transaction sees the already-updated bid and retries/rejects automatically.
-export async function placeBid(playerId, teamId, team, settings) {
+// Uses a transaction so two captains bidding at the same instant cannot both win. Firebase
+// retries the update function automatically on conflict, passing in whatever the *current*
+// server value is — left unchecked, that means a captain's tap can get silently re-targeted at
+// a higher tier than the one they actually saw and chose. expectedBid pins the attempt to the
+// exact price shown at tap time: if the price has already moved, the whole attempt is killed
+// (bidBaseUnchanged false, abort) rather than auto-escalated. The captain must tap again to
+// knowingly bid the new price.
+export async function placeBid(playerId, teamId, team, settings, expectedBid) {
   const auctionRef = ref(db, 'auction/current');
   const result = await runTransaction(auctionRef, (current) => {
     if (!current || current.status !== 'bidding' || current.playerId !== playerId) return current;
     if (current.leadingTeamId === teamId) return current; // already leading, no-op
+    if (!bidBaseUnchanged(current.bid, expectedBid)) return current; // price moved since this tap was decided — kill it
     const required = nextBidAmount(current.bid, settings.tiers, settings.base);
     if (required > maxBidForTeam(team, settings)) return current; // can't afford, no-op
     const bidLogKey = `b${Date.now()}`;

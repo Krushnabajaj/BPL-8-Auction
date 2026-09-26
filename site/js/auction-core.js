@@ -13,6 +13,30 @@ export function maxBidForTeam(team, settings) {
   return team.purse - (slotsLeft - 1) * settings.base;
 }
 
+// Guards against the classic double-tap race: two captains both decide to bid against the
+// same displayed price at the same instant. Without this, Firebase's transaction retry would
+// silently re-target the loser's tap at the *next* tier above whatever just landed — a bid the
+// captain never actually chose. Comparing against the exact price they saw means a stale tap is
+// killed outright; the captain must tap again to knowingly bid the new price.
+export function bidBaseUnchanged(currentBid, expectedBid) {
+  return (currentBid || 0) === (expectedBid || 0);
+}
+
+// Computes the auction/current state after discarding the most recent bid — used to undo a
+// captain's mis-tap during live bidding. Falls back to base state (no bid, no leader, empty
+// log) when there was only ever one bid on this player.
+export function bidLogWithoutLast(bidLog) {
+  const entries = Object.entries(bidLog || {}).sort((a, b) => (b[1].at || 0) - (a[1].at || 0));
+  if (!entries.length) return { bid: 0, leadingTeamId: null, bidLog: null };
+  const remaining = entries.slice(1);
+  const previous = remaining[0]?.[1] || null;
+  return {
+    bid: previous ? previous.amount : 0,
+    leadingTeamId: previous ? previous.teamId : null,
+    bidLog: remaining.length ? Object.fromEntries(remaining) : null,
+  };
+}
+
 export function canTeamBid(team, auction, settings) {
   const totalBuySlots = settings.squadSize - 1;
   if ((team.boughtCount || 0) >= totalBuySlots) return false;

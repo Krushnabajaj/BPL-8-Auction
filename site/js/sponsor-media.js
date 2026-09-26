@@ -5,13 +5,9 @@
 export const SPONSOR_SLIDES = [
   { type: 'title' },
   { type: 'image', src: 'assets/sponsors/bpl-banner.jpg', label: 'BPL 8 · Teams & Sponsors' },
-  {
-    type: 'logos',
-    items: [
-      { src: 'assets/casorra.jpg', label: 'Title Sponsor' },
-      { src: 'assets/chai-katta.png', label: 'Co-Title Sponsor' },
-      { src: 'assets/mvpm.jpg', label: 'Community Partner' },
-    ],
-  },
+  { type: 'logo', src: 'assets/casorra.jpg', label: 'Title Sponsor', imgClass: 'logoCasorra' },
+  { type: 'image', src: 'assets/sponsors/casorra-promo.jpg', label: 'Title Sponsor · CASORRA' },
+  { type: 'logo', src: 'assets/chai-katta.png', label: 'Co-Title Sponsor' },
+  { type: 'logo', src: 'assets/mvpm.jpg', label: 'Community Partner' },
   { type: 'video', src: 'assets/sponsors/casorra-intro.mp4', label: 'Title Sponsor · CASORRA' },
 ];

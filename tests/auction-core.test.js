@@ -9,6 +9,8 @@ import {
   pickRandomPlayer,
   formatMoney,
   isPoolExhausted,
+  bidBaseUnchanged,
+  bidLogWithoutLast,
 } from '../site/js/auction-core.js';
 
 const TIERS = [
@@ -172,4 +174,58 @@ test('isPoolExhausted_somePlayersStillInPool_returnsFalse', () => {
 
 test('isPoolExhausted_emptyPlayerList_returnsTrue', () => {
   assert.equal(isPoolExhausted([]), true);
+});
+
+test('bidBaseUnchanged_currentMatchesExpected_returnsTrue', () => {
+  assert.equal(bidBaseUnchanged(800000, 800000), true);
+});
+
+test('bidBaseUnchanged_currentMovedSinceCaptainDecided_returnsFalse', () => {
+  // Captain A's bid already raised it from 8L to 9L; captain B's tap (decided against 8L)
+  // must be killed, not silently re-targeted at the next tier above 9L.
+  assert.equal(bidBaseUnchanged(900000, 800000), false);
+});
+
+test('bidBaseUnchanged_bothUnsetAtAuctionStart_treatsAsZero', () => {
+  assert.equal(bidBaseUnchanged(undefined, undefined), true);
+  assert.equal(bidBaseUnchanged(0, undefined), true);
+  assert.equal(bidBaseUnchanged(undefined, 0), true);
+});
+
+test('bidBaseUnchanged_currentUnsetButExpectedNonzero_returnsFalse', () => {
+  assert.equal(bidBaseUnchanged(undefined, 800000), false);
+});
+
+test('bidLogWithoutLast_emptyLog_returnsBaseState', () => {
+  assert.deepEqual(bidLogWithoutLast(null), { bid: 0, leadingTeamId: null, bidLog: null });
+  assert.deepEqual(bidLogWithoutLast({}), { bid: 0, leadingTeamId: null, bidLog: null });
+});
+
+test('bidLogWithoutLast_onlyOneBidEver_revertsToBaseAndClearsLog', () => {
+  const log = { b1: { teamId: 't1', amount: 200000, at: 100 } };
+  assert.deepEqual(bidLogWithoutLast(log), { bid: 0, leadingTeamId: null, bidLog: null });
+});
+
+test('bidLogWithoutLast_twoBids_revertsToFirstBidAndKeepsItInLog', () => {
+  const log = {
+    b1: { teamId: 't1', amount: 200000, at: 100 },
+    b2: { teamId: 't2', amount: 300000, at: 200 },
+  };
+  assert.deepEqual(bidLogWithoutLast(log), {
+    bid: 200000,
+    leadingTeamId: 't1',
+    bidLog: { b1: { teamId: 't1', amount: 200000, at: 100 } },
+  });
+});
+
+test('bidLogWithoutLast_threeBids_dropsOnlyTheMostRecent', () => {
+  const log = {
+    b1: { teamId: 't1', amount: 200000, at: 100 },
+    b2: { teamId: 't2', amount: 300000, at: 200 },
+    b3: { teamId: 't1', amount: 500000, at: 300 },
+  };
+  const result = bidLogWithoutLast(log);
+  assert.equal(result.bid, 300000);
+  assert.equal(result.leadingTeamId, 't2');
+  assert.deepEqual(Object.keys(result.bidLog).sort(), ['b1', 'b2']);
 });

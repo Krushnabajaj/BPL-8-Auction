@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="sponsorBar compact">
-  <div class="sponsorChip"><span class="sponsorLabel">Title Sponsor</span><img src="assets/casorra.jpg" alt="Casorra"></div>
+  <div class="sponsorChip"><span class="sponsorLabel">Title Sponsor</span><img src="assets/casorra.jpg" alt="Casorra" class="logoCasorra"></div>
   <div class="sponsorChip"><span class="sponsorLabel">Co-Title Sponsor</span><img src="assets/chai-katta.png" alt="Chai Katta"></div>
   <div class="sponsorChip"><span class="sponsorLabel">Community Partner</span><img src="assets/mvpm.jpg" alt="MVPM"></div>
 </div>
@@ -126,7 +126,10 @@
         </div>
       </section>
       <section class="card">
-        <h3>Live Bids</h3>
+        <div class="row" style="justify-content:space-between">
+          <h3>Live Bids</h3>
+          <button class="small danger" id="undoBidBtn" style="display:none">↩ Undo Last Bid</button>
+        </div>
         <div class="bidFeed" id="bidFeed"><p class="muted">No bids yet.</p></div>
         <h3 style="margin-top:16px">Teams</h3>
         <div class="teamGrid" id="teamGrid"></div>
@@ -159,8 +162,8 @@
 <script type="module">
   import { onAuth, signOutUser, resolveRole, watchSettings, watchTeams, watchPlayers, watchAuctionCurrent, watchHistory, watchConnection, watchBroadcastOverlay, setBroadcastOverlay, getPhoto,
            saveSettings, saveTeam, deleteTeam, savePlayer, deletePlayer, savePhoto,
-           startDraw, openBidding, cancelDraw, markSold, markUnsold, undoLast, readdUnsoldToPool,
-           editSoldPlayer, revertSoldPlayer } from './js/db.js';
+           startDraw, openBidding, cancelDraw, markSold, markUnsold, undoLast, undoLastBid, readdUnsoldToPool,
+           editSoldPlayer, revertSoldPlayer, markPlayerSoldDirect } from './js/db.js';
   import { formatMoney, maxBidForTeam, pickRandomPlayer, isPoolExhausted } from './js/auction-core.js';
   import { runSpinAnimation } from './js/spinner.js';
   import { readImageFile } from './js/photo.js';
@@ -294,15 +297,18 @@
     const term = playerSearchTerm.trim().toLowerCase();
     const visible = term ? players.filter((p) => (p.name || '').toLowerCase().includes(term)) : players;
     $('playersList').innerHTML = visible.map((p) => {
-      if (p.status === 'sold' && editingSaleId === p.id) {
+      if (editingSaleId === p.id && !p.isCaptain) {
         return `<div class="item" style="flex-direction:column;align-items:stretch">
           <b>${esc(p.name)}</b>
           <div class="row" style="margin-top:6px">
-            <select data-sale-team style="flex:1">${teams.map((t) => `<option value="${t.id}" ${t.id === p.teamId ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select>
-            <input data-sale-price type="number" step="0.5" style="width:120px" value="${(p.price || 0) / L}" placeholder="₹ Lakh">
+            <select data-sale-team style="flex:1">
+              <option value="">— Select team —</option>
+              ${teams.map((t) => `<option value="${t.id}" ${t.id === p.teamId ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}
+            </select>
+            <input data-sale-price type="number" step="0.5" style="width:120px" value="${p.price ? p.price / L : ''}" placeholder="₹ Lakh">
           </div>
           <div class="row" style="margin-top:6px">
-            <button class="small primary" data-save-sale="${p.id}">Save Correction</button>
+            <button class="small primary" data-save-sale="${p.id}">${p.status === 'sold' ? 'Save Correction' : 'Mark Sold'}</button>
             <button class="small" data-cancel-sale="${p.id}">Cancel</button>
           </div>
         </div>`;
@@ -312,11 +318,17 @@
         : p.status === 'sold' ? `<span class="badge sold">SOLD — ${esc(teamName)} · ${formatMoney(p.price||0)}</span>`
         : p.status === 'unsold' ? `<span class="badge unsold">UNSOLD</span>`
         : `<span class="badge">POOL</span>`;
-      const saleActions = p.status === 'sold' && !p.isCaptain
-        ? `<button class="small" data-editsale-player="${p.id}">✏ Edit Sale</button><button class="small danger" data-revert-player="${p.id}">↩ Revert</button>`
-        : '';
+      let statusActions = '';
+      if (!p.isCaptain) {
+        if (p.status === 'sold') {
+          statusActions = `<button class="small" data-editsale-player="${p.id}">✏ Edit Sale</button><button class="small danger" data-revert-player="${p.id}">↩ Revert</button>`;
+        } else {
+          statusActions = `<button class="small teal" data-marksold-player="${p.id}">💰 Mark Sold</button>`;
+          if (p.status === 'unsold') statusActions += `<button class="small" data-returnpool-player="${p.id}">↺ Return to Pool</button>`;
+        }
+      }
       return `<div class="item"><div style="flex:1"><b>${esc(p.name)}</b> <span class="muted">${esc(p.role||'')}</span><br>${statusBadge}</div>
-        ${saleActions}
+        ${statusActions}
         <button data-edit-player="${p.id}">Edit</button>
         <button class="danger" data-del-player="${p.id}">Delete</button></div>`;
     }).join('') || '<p class="muted">No players yet.</p>';
@@ -326,6 +338,10 @@
     }));
     $('playersList').querySelectorAll('[data-editsale-player]').forEach((b) => b.addEventListener('click', () => {
       editingSaleId = b.dataset.editsalePlayer;
+      renderPlayersList();
+    }));
+    $('playersList').querySelectorAll('[data-marksold-player]').forEach((b) => b.addEventListener('click', () => {
+      editingSaleId = b.dataset.marksoldPlayer;
       renderPlayersList();
     }));
     $('playersList').querySelectorAll('[data-cancel-sale]').forEach((b) => b.addEventListener('click', () => {
@@ -338,12 +354,20 @@
       const teamId = row.querySelector('[data-sale-team]').value;
       const price = Math.round(Number(row.querySelector('[data-sale-price]').value) * L);
       if (!teamId || !(price >= 0)) { await alertModal('Pick a team and a valid price.'); return; }
+      const p = players.find((x) => x.id === id);
       editingSaleId = null;
-      await editSoldPlayer(id, teamId, price);
+      if (p && p.status === 'sold') await editSoldPlayer(id, teamId, price);
+      else await markPlayerSoldDirect(id, teamId, price);
     }));
     $('playersList').querySelectorAll('[data-revert-player]').forEach((b) => b.addEventListener('click', async () => {
       if (await confirmModal('Revert this sale? The player goes back to the draw pool and the team is refunded.')) {
         await revertSoldPlayer(b.dataset.revertPlayer);
+      }
+    }));
+    $('playersList').querySelectorAll('[data-returnpool-player]').forEach((b) => b.addEventListener('click', async () => {
+      const p = players.find((x) => x.id === b.dataset.returnpoolPlayer);
+      if (p && await confirmModal(`Return ${p.name} to the draw pool?`)) {
+        await savePlayer({ ...p, status: 'pool' });
       }
     }));
   }
@@ -447,6 +471,7 @@
       const t = teams.find((x) => x.id === b.teamId);
       return `<div class="item">${esc(t?.name||'?')} → ${formatMoney(b.amount)}</div>`;
     }).join('') : '<p class="muted">No bids yet.</p>';
+    $('undoBidBtn').style.display = (auction.status === 'bidding' && log.length) ? 'inline-block' : 'none';
   }
   const showLivePhoto = createPhotoView($('photoBox'));
   function showPlayer(p) {
@@ -522,6 +547,9 @@
   });
   $('undoBtn').addEventListener('click', async () => {
     if (await confirmModal('Undo the last sold/unsold result?')) await undoLast();
+  });
+  $('undoBidBtn').addEventListener('click', async () => {
+    if (await confirmModal('Undo the last bid? The previous highest bid (or no bid) becomes current again.')) await undoLastBid();
   });
   $('readdUnsoldBtn').addEventListener('click', async () => {
     if (await confirmModal('Move all unsold players back into the pool?')) await readdUnsoldToPool();
